@@ -1,1 +1,1 @@
-# Your Python GUI script will go here
+# This is a placeholder. Full script should be copied in later.

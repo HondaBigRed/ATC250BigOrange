@@ -1,3 +1,3 @@
-# ATC250BigOrange Dashboard
+# ATC250BigOrange
 
-Instructions to run the project will go here.
+Digital dash and control system for Raspberry Pi.
