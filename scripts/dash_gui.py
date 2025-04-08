@@ -18,9 +18,10 @@ for pin in RELAY_PINS.values():
 # State tracking
 states = {name: False for name in RELAY_PINS}
 hazards_active = False
+hazard_toggle = False  # For alternating logic
 
 # Load icon images
-def load_icon(path, size=(64, 64)):
+def load_icon(path, size=(320, 320)):
     image = Image.open(path).resize(size, Image.ANTIALIAS)
     return ImageTk.PhotoImage(image)
 
@@ -56,18 +57,34 @@ icons = {
     }
 }
 
-# Toggle relay function
-def toggle_output(name, button):
-    global states
-    pin = RELAY_PINS[name]
-    states[name] = not states[name]
-    GPIO.gpio_write(chip_handle, pin, 1 if states[name] else 0)
-    update_button_icon(button, states[name], icons[name])
-
 def update_button_icon(button, active, icon_pair):
     button.config(image=icon_pair["on"] if active else icon_pair["off"])
 
-# Hazards (replacing Party Mode)
+def set_output(name, on):
+    pin = RELAY_PINS[name]
+    GPIO.gpio_write(chip_handle, pin, 1 if on else 0)
+    states[name] = on
+    update_button_icon(buttons[name], on, icons[name])
+
+def toggle_output(name, button):
+    # If turning low or high beam ON, disable the other
+    if name == "low_beam":
+        set_output("low_beam", not states["low_beam"])
+        if states["low_beam"]:
+            set_output("high_beam", False)
+    elif name == "high_beam":
+        set_output("high_beam", not states["high_beam"])
+        if states["high_beam"]:
+            set_output("low_beam", False)
+    else:
+        set_output(name, not states[name])
+
+    # Auto-on tail light if low or high beam is active
+    if name in ["low_beam", "high_beam"]:
+        tail_should_be_on = states["low_beam"] or states["high_beam"]
+        set_output("tail_light", tail_should_be_on)
+
+# Hazards (alternate tail and high beam)
 def toggle_hazards(button):
     global hazards_active
     hazards_active = not hazards_active
@@ -76,26 +93,20 @@ def toggle_hazards(button):
         cycle_hazards()
 
 def cycle_hazards():
+    global hazard_toggle
     if hazards_active:
-        # Turn all lights ON
-        GPIO.gpio_write(chip_handle, RELAY_PINS["low_beam"], 1)
-        GPIO.gpio_write(chip_handle, RELAY_PINS["high_beam"], 1)
-        GPIO.gpio_write(chip_handle, RELAY_PINS["tail_light"], 1)
-        root.after(500, lambda: (
-            GPIO.gpio_write(chip_handle, RELAY_PINS["low_beam"], 0),
-            GPIO.gpio_write(chip_handle, RELAY_PINS["high_beam"], 0),
-            GPIO.gpio_write(chip_handle, RELAY_PINS["tail_light"], 0),
-            root.after(500, cycle_hazards)
-        ))
+        hazard_toggle = not hazard_toggle
+        GPIO.gpio_write(chip_handle, RELAY_PINS["high_beam"], 1 if hazard_toggle else 0)
+        GPIO.gpio_write(chip_handle, RELAY_PINS["tail_light"], 0 if hazard_toggle else 1)
+        root.after(500, cycle_hazards)
     else:
-        GPIO.gpio_write(chip_handle, RELAY_PINS["low_beam"], 0)
         GPIO.gpio_write(chip_handle, RELAY_PINS["high_beam"], 0)
         GPIO.gpio_write(chip_handle, RELAY_PINS["tail_light"], 0)
 
-# Button config with no border/hover flash
+# Button config with no borders/hover effects and increased size
 button_style = {
-    "width": 100,
-    "height": 100,
+    "width": 320,
+    "height": 320,
     "compound": "top",
     "bg": "black",
     "activebackground": "black",
@@ -115,7 +126,7 @@ buttons = {
     "hazards": tk.Button(button_frame, text="Hazards", **button_style)
 }
 
-# Assign images and commands
+# Assign icons and logic
 for name in buttons:
     update_button_icon(buttons[name], False, icons[name])
 
