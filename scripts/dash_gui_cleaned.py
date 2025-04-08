@@ -1,7 +1,7 @@
 
 import tkinter as tk
 from PIL import Image, ImageTk
-import RPi.GPIO as GPIO
+import LGPIO as GPIO
 import os
 
 # GPIO Setup
