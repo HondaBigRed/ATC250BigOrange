@@ -1,6 +1,6 @@
 
 import tkinter as tk
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, Resampling
 import lgpio as GPIO
 from pathlib import Path
 
@@ -18,11 +18,11 @@ for pin in RELAY_PINS.values():
 # State tracking
 states = {name: False for name in RELAY_PINS}
 hazards_active = False
-hazard_toggle = False  # For alternating logic
+hazard_toggle = False
 
 # Load icon images
-def load_icon(path, size=(320, 320)):
-    image = Image.open(path).resize(size, Image.ANTIALIAS)
+def load_icon(path, size=(128, 128)):
+    image = Image.open(path).resize(size, Resampling.LANCZOS)
     return ImageTk.PhotoImage(image)
 
 # GUI setup
@@ -67,7 +67,6 @@ def set_output(name, on):
     update_button_icon(buttons[name], on, icons[name])
 
 def toggle_output(name, button):
-    # If turning low or high beam ON, disable the other
     if name == "low_beam":
         set_output("low_beam", not states["low_beam"])
         if states["low_beam"]:
@@ -79,12 +78,10 @@ def toggle_output(name, button):
     else:
         set_output(name, not states[name])
 
-    # Auto-on tail light if low or high beam is active
     if name in ["low_beam", "high_beam"]:
         tail_should_be_on = states["low_beam"] or states["high_beam"]
         set_output("tail_light", tail_should_be_on)
 
-# Hazards (alternate tail and high beam)
 def toggle_hazards(button):
     global hazards_active
     hazards_active = not hazards_active
@@ -103,10 +100,9 @@ def cycle_hazards():
         GPIO.gpio_write(chip_handle, RELAY_PINS["high_beam"], 0)
         GPIO.gpio_write(chip_handle, RELAY_PINS["tail_light"], 0)
 
-# Button config with no borders/hover effects and increased size
 button_style = {
-    "width": 320,
-    "height": 320,
+    "width": 150,
+    "height": 150,
     "compound": "top",
     "bg": "black",
     "activebackground": "black",
@@ -114,7 +110,6 @@ button_style = {
     "bd": 0
 }
 
-# Layout
 button_frame = tk.Frame(root, bg="black")
 button_frame.pack(expand=True)
 
@@ -126,7 +121,6 @@ buttons = {
     "hazards": tk.Button(button_frame, text="Hazards", **button_style)
 }
 
-# Assign icons and logic
 for name in buttons:
     update_button_icon(buttons[name], False, icons[name])
 
@@ -136,18 +130,15 @@ buttons["tail_light"].config(command=lambda: toggle_output("tail_light", buttons
 buttons["vape"].config(command=lambda: toggle_output("vape", buttons["vape"]))
 buttons["hazards"].config(command=lambda: toggle_hazards(buttons["hazards"]))
 
-# Grid layout
-buttons["low_beam"].grid(row=0, column=0, padx=20, pady=20)
-buttons["high_beam"].grid(row=0, column=1, padx=20, pady=20)
-buttons["tail_light"].grid(row=0, column=2, padx=20, pady=20)
-buttons["vape"].grid(row=0, column=3, padx=20, pady=20)
-buttons["hazards"].grid(row=0, column=4, padx=20, pady=20)
+buttons["low_beam"].grid(row=0, column=0, padx=10, pady=10)
+buttons["high_beam"].grid(row=0, column=1, padx=10, pady=10)
+buttons["tail_light"].grid(row=0, column=2, padx=10, pady=10)
+buttons["vape"].grid(row=0, column=3, padx=10, pady=10)
+buttons["hazards"].grid(row=0, column=4, padx=10, pady=10)
 
-# Exit fullscreen with ESC
 def exit_fullscreen(event=None):
     root.attributes('-fullscreen', False)
 
 root.bind("<Escape>", exit_fullscreen)
 
-# Start GUI
 root.mainloop()
