@@ -1,6 +1,6 @@
 
 import tkinter as tk
-from PIL import Image, ImageTk, Resampling
+from PIL import Image, ImageTk
 import lgpio as GPIO
 from pathlib import Path
 
@@ -22,7 +22,7 @@ hazard_toggle = False
 
 # Load icon images
 def load_icon(path, size=(128, 128)):
-    image = Image.open(path).resize(size, Resampling.LANCZOS)
+    image = Image.open(path).resize(size, Image.LANCZOS)
     return ImageTk.PhotoImage(image)
 
 # GUI setup
