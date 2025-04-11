@@ -1,86 +1,197 @@
 import os.path
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
 from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.clock import Clock
+from kivy.properties import BooleanProperty, ObjectProperty
+from kivy.uix.screenmanager import ScreenManager, Screen
 
-class MainScreen(BoxLayout):
+class RelayControlScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.orientation = 'vertical'
+        self.padding = 10
+        self.spacing = 10
 
-        # Speedometer
-        speedometer_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=100)  # Adjust height as needed
-        speedometer_image = Image(source=os.path.join(os.path.dirname(__file__), 'icons/speedometer.png'), size_hint_x=None, width=100)  # Adjust width as needed
-        speedometer_label = Label(text='Speed: 0 MPH', size_hint_x=1.5)  # Adjust size_hint_x as needed
-        speedometer_box.add_widget(speedometer_image)
-        speedometer_box.add_widget(speedometer_label)
-        self.add_widget(speedometer_box)
+        # Header
+        header_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
+        header_label = Label(text="Relay Control", font_size=24)
+        header_box.add_widget(header_label)
+        self.add_widget(header_box)
 
-        # RPM
-        rpm_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=100)  # Adjust height as needed
-        rpm_image = Image(source=os.path.join(os.path.dirname(__file__), 'icons/rpm.png'), size_hint_x=None, width=100)  # Adjust width as needed
-        rpm_label = Label(text='RPM: 0', size_hint_x=1.5)  # Adjust size_hint_x as needed
-        rpm_box.add_widget(rpm_image)
-        rpm_box.add_widget(rpm_label)
-        self.add_widget(rpm_box)
+        # Relay Control Buttons
+        relay_button_box = BoxLayout(orientation='vertical', size_hint_y=None, height=400)
 
-        # Engine Temperature
-        engine_temp_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=100)  # Adjust height as needed
-        engine_temp_image = Image(source=os.path.join(os.path.dirname(__file__), 'icons/thermometer.png'), size_hint_x=None, width=100)  # Adjust width as needed
-        engine_temp_label = Label(text='Engine Temp: 0 °C', size_hint_x=1.5)  # Adjust size_hint_x as needed
-        engine_temp_box.add_widget(engine_temp_image)
-        engine_temp_box.add_widget(engine_temp_label)
-        self.add_widget(engine_temp_box)
+        # --- Low Beam Control ---
+        low_beam_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=100)
+        self.low_beams_on = BooleanProperty(False)
+        self.low_beam_image = Image(source=self.get_low_beam_icon(), size_hint_x=None, width=100)
+        self.low_beam_button = Button(text="Low Beams", on_press=self.toggle_low_beams)
+        low_beam_box.add_widget(self.low_beam_image)
+        low_beam_box.add_widget(self.low_beam_button)
+        relay_button_box.add_widget(low_beam_box)
 
-        # Air/Fuel Ratio
-        afr_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=100)  # Adjust height as needed
-        afr_image = Image(source=os.path.join(os.path.dirname(__file__), 'icons/afr.png'), size_hint_x=None, width=100)  # Adjust width as needed
-        afr_label = Label(text='AFR: 0', size_hint_x=1.5)  # Adjust size_hint_x as needed
-        afr_box.add_widget(afr_image)
-        afr_box.add_widget(afr_label)
-        self.add_widget(afr_box)
+        # --- High Beam Control ---
+        high_beam_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=100)
+        self.high_beams_on = BooleanProperty(False)
+        self.high_beam_image = Image(source=self.get_high_beam_icon(), size_hint_x=None, width=100)
+        self.high_beam_button = Button(text="High Beams", on_press=self.toggle_high_beams)
+        high_beam_box.add_widget(self.high_image)
+        high_beam_box.add_widget(self.high_beam_button)
+        relay_button_box.add_widget(high_beam_box)
 
-        # Gear Indicator (Placeholder)
-        gear_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=100)  # Adjust height as needed
-        gear_image = Image(source=os.path.join(os.path.dirname(__file__), 'icons/gear.png'), size_hint_x=None, width=100)  # Adjust width as needed
-        gear_label = Label(text='Gear: N', size_hint_x=1.5)  # Adjust size_hint_x as needed
-        gear_box.add_widget(gear_image)
-        gear_box.add_widget(gear_label)
-        self.add_widget(gear_box)
+        # --- Taillight Control ---
+        tail_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=100)
+        self.tail_on = BooleanProperty(True)  # Initial state is ON
+        self.tail_image = Image(source=self.get_tail_icon(), size_hint_x=None, width=100)
+        self.tail_button = Button(text="Taillights", on_press=self.toggle_tail)
+        tail_box.add_widget(self.tail_image)
+        tail_box.add_widget(self.tail_button)
+        relay_button_box.add_widget(tail_box)
 
-        # Warning Lights (Placeholder)
-        warning_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=100)  # Adjust height as needed
-        warning_image = Image(source=os.path.join(os.path.dirname(__file__), 'icons/warning.png'), size_hint_x=None, width=100)  # Adjust width as needed
-        warning_label = Label(text='Warnings: None', size_hint_x=1.5)  # Adjust size_hint_x as needed
-        warning_box.add_widget(warning_image)
-        warning_box.add_widget(warning_label)
-        self.add_widget(warning_box)
+        # --- Hazard Light Control ---
+        haz_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=100)
+        self.haz_on = BooleanProperty(False)
+        self.haz_image = Image(source=self.get_haz_icon(), size_hint_x=None, width=100)
+        self.haz_button = Button(text="Hazard Lights", on_press=self.toggle_haz)
+        haz_box.add_widget(self.haz_image)
+        haz_box.add_widget(self.haz_button)
+        relay_button_box.add_widget(haz_box)
 
-        # Schedule the update function to run every 0.1 seconds
-        Clock.schedule_interval(self.update_labels, 0.1)
+        # --- Horn Control ---
+        horn_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=100)
+        self.horn_on = BooleanProperty(False)
+        self.horn_image = Image(source=self.get_horn_icon(), size_hint_x=None, width=100)
+        self.horn_button = Button(text="Horn", on_press=self.toggle_horn)
+        horn_box.add_widget(self.horn_image)
+        horn_box.add_widget(self.horn_button)
+        relay_button_box.add_widget(horn_box)
+        self.horn_button.bind(on_press=self.horn_pressed, on_release=self.horn_released) # Use on_press and on_release
 
-        # Initialize sensor data (replace with actual sensor readings)
-        self.speed = 0
-        self.rpm = 0
-        self.engine_temp = 0
-        self.afr = 0
-        self.gear = 'N'
-        self.warnings = 'None'
+        # --- Vape Control ---
+        vape_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=100)
+        self.vape_on = BooleanProperty(True)  # Initial state is ON
+        self.vape_image = Image(source=self.get_vape_icon(), size_hint_x=None, width=100)
+        self.vape_button = Button(text="Vape", on_press=self.toggle_vape)
+        vape_box.add_widget(self.vape_image)
+        vape_box.add_widget(self.vape_button)
+        relay_button_box.add_widget(vape_box)
 
-    def update_labels(self, dt):
-        # Update the labels with the latest sensor data
-        self.speedometer_label.text = f'Speed: {self.speed} MPH'
-        self.rpm_label.text = f'RPM: {self.rpm}'
-        self.engine_temp_label.text = f'Engine Temp: {self.engine_temp} °C'
-        self.afr_label.text = f'AFR: {self.afr}'
-        self.gear_label.text = f'Gear: {self.gear}'
-        self.warning_label.text = f'Warnings: {self.warnings}'
+        self.add_widget(relay_button_box)
+
+        # Schedule the hazard light flashing
+        self.flash_event = None  # Store the event for later unscheduling
+
+    def on_kv_post(self, base_widget):
+        # After all widgets are created, set initial icon states
+        self.update_all_buttons()
+
+    def get_low_beam_icon(self):
+        return os.path.join(os.path.dirname(__file__), 'icons/low_on.png' if self.low_beams_on else 'icons/low_off.png')
+
+    def toggle_low_beams(self, instance):
+        # Placeholder: Replace with actual relay control logic
+        self.low_beams_on = not self.low_beams_on
+        self.low_beam_image.source = self.get_low_beam_icon()
+        self.update_high_low_interlock()
+        print(f"Toggling low beams. New state: {'ON' if self.low_beams_on else 'OFF'}")
+
+    def get_high_beam_icon(self):
+        return os.path.join(os.path.dirname(__file__), 'icons/high_on.png' if self.high_beams_on else 'icons/high_off.png')
+
+    def toggle_high_beams(self, instance):
+        # Placeholder: Replace with actual relay control logic
+        self.high_beams_on = not self.high_beams_on
+        self.high_beam_image.source = self.get_high_beam_icon()
+        self.update_high_low_interlock()
+        print(f"Toggling high beams. New state: {'ON' if self.high_beams_on else 'OFF'}")
+
+    def update_high_low_interlock(self):
+        # Ensure only one of high or low beams is on
+        if self.high_beams_on and self.low_beams_on:
+            if self.high_beams_on:
+                self.low_beams_on = False
+                self.low_beam_image.source = self.get_low_beam_icon()
+            elif self.low_beams_on:
+                self.high_beams_on = False
+                self.high_beam_image.source = self.get_high_beam_icon()
+
+    def get_tail_icon(self):
+        return os.path.join(os.path.dirname(__file__), 'icons/tail_on.png' if self.tail_on else 'icons/tail_off.png')
+
+    def toggle_tail(self, instance):
+        # Placeholder: Replace with actual relay control logic
+        self.tail_on = not self.tail_on
+        self.tail_image.source = self.get_tail_icon()
+        print(f"Toggling taillights. New state: {'ON' if self.tail_on else 'OFF'}")
+
+    def get_haz_icon(self):
+        return os.path.join(os.path.dirname(__file__), 'icons/haz_on.png' if self.haz_on else 'icons/haz_off.png')
+
+    def toggle_haz(self, instance):
+        # Placeholder: Replace with actual relay control logic
+        self.haz_on = not self.haz_on
+        self.haz_image.source = self.get_haz_icon()
+
+        if self.haz_on:
+            # Start flashing
+            self.flash_event = Clock.schedule_interval(self.flash_hazard_lights, 0.5)  # 2Hz
+            print("Starting hazard lights")
+        else:
+            # Stop flashing
+            if self.flash_event:
+                Clock.unschedule(self.flash_event)
+                self.flash_event = None
+            # Ensure lights are in their correct state.
+            self.update_all_buttons()
+            print("Stopping hazard lights")
+
+    def flash_hazard_lights(self, dt):
+        # Placeholder: Implement hazard light flashing logic
+        # This function is called by the Clock every 0.5 seconds
+        self.high_beams_on = not self.high_beams_on
+        self.low_beams_on = not self.low_beams_on # Added low beams to flash
+        self.tail_on = not self.tail_on
+        self.high_beam_image.source = self.get_high_beam_icon()
+        self.low_beam_image.source = self.get_low_beam_icon() # Added low beams to flash
+        self.tail_image.source = self.get_tail_icon()
+
+    def get_horn_icon(self):
+        return os.path.join(os.path.dirname(__file__), 'icons/horn_on.png' if self.horn_on else 'icons/horn_off.png')
+
+    def toggle_horn(self, instance):
+        # Placeholder: Implement momentary horn control
+        self.horn_on = True # Set to true on press
+        self.horn_image.source = self.get_horn_icon()
+        print("Horn ON")
+
+    def horn_released(self, instance):
+        self.horn_on = False # Set to false on release
+        self.horn_image.source = self.get_horn_icon()
+        print("Horn OFF")
+
+    def get_vape_icon(self):
+        return os.path.join(os.path.dirname(__file__), 'icons/vape_on.png' if self.vape_on else 'icons/vape_off.png')
+
+    def toggle_vape(self, instance):
+        # Placeholder: Replace with actual relay control logic
+        self.vape_on = not self.vape_on
+        self.vape_image.source = self.get_vape_icon()
+        print(f"Toggling vape. New state: {'ON' if self.vape_on else 'OFF'}")
+
+    def update_all_buttons(self):
+        self.low_beam_image.source = self.get_low_beam_icon()
+        self.high_beam_image.source = self.get_high_beam_icon()
+        self.tail_image.source = self.get_tail_icon()
+        self.haz_image.source = self.get_haz_icon()
+        self.horn_image.source = self.get_horn_icon()
+        self.vape_image.source = self.get_vape_icon()
 
 class MainApp(App):
     def build(self):
-        return MainScreen()
+        return RelayControlScreen()
 
 if __name__ == '__main__':
     MainApp().run()
