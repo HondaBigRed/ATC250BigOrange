@@ -1,4 +1,4 @@
-import os.path
+import os
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
@@ -8,20 +8,8 @@ from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.behaviors import ButtonBehavior  # Import ButtonBehavior
 
-try:
-    import RPi.GPIO as GPIO  # Import RPi.GPIO
-except ImportError:
-    print("RPi.GPIO not available on this platform. Relays will not be controlled.")
-    GPIO = None
 
-
-ICONS_DIR = os.path.join(os.path.dirname(__file__), 'icons')  # Consistent icon path
-
-# Define GPIO pin numbers
-LOW_BEAM_PIN = 26
-HIGH_BEAM_PIN = 4
-TAIL_PIN = 7
-VAPE_PIN = 22
+ICONS_DIR = os.path.join(os.path.dirname(__file__), 'icons')  # Consistent icon directory
 
 
 class ImageButton(ButtonBehavior, Image):  # Create a custom ImageButton
@@ -60,6 +48,7 @@ class RelayControlScreen(Screen):
 
         # --- High Beam Control ---
         high_beam_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=100)
+        self.high_beams_on = BooleanProperty(False)  # Initial state is OFF
         self.high_beam_image = ImageButton(source=self.get_icon('high', self.high_beams_on), size_hint_x=None, width=100)
         self.high_beam_image.bind(on_press=self.toggle_high_beams)
         high_beam_box.add_widget(self.high_beam_image)
@@ -67,6 +56,7 @@ class RelayControlScreen(Screen):
 
         # --- Taillight Control ---
         tail_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=100)
+        self.tail_on = BooleanProperty(True)  # Initial state is ON
         self.tail_image = ImageButton(source=self.get_icon('tail', self.tail_on), size_hint_x=None, width=100)
         self.tail_image.bind(on_press=self.toggle_tail)
         tail_box.add_widget(self.tail_image)
@@ -74,6 +64,7 @@ class RelayControlScreen(Screen):
 
         # --- Hazard Light Control ---
         haz_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=100)
+        self.haz_on = BooleanProperty(False)  # Initial state is OFF
         self.haz_image = ImageButton(source=self.get_icon('haz', self.haz_on), size_hint_x=None, width=100)
         self.haz_image.bind(on_press=self.toggle_haz)
         haz_box.add_widget(self.haz_image)
@@ -107,10 +98,10 @@ class RelayControlScreen(Screen):
 
     def get_icon(self, control_name, state):
         try:
-            return os.path.join(RelayControlScreen.ICONS_DIR, f'{control_name}_{"on" if state else "off"}.png')
+            return os.path.join(self.ICONS_DIR, f'{control_name}_{"on" if state else "off"}.png')
         except FileNotFoundError:
             print(f"Icon file not found for {control_name}, using default.")
-            return os.path.join(RelayControlScreen.ICONS_DIR, 'default.png')  # Replace 'default.png' with a placeholder
+            return os.path.join(self.ICONS_DIR, 'default.png')  # Replace 'default.png' with a placeholder
 
     def toggle_low_beams(self, instance, *args):  # Added *args
         # Placeholder: Replace with actual relay control logic
@@ -118,8 +109,11 @@ class RelayControlScreen(Screen):
         self.low_beam_image.source = self.get_icon('low', self.low_beams_on)
         self.update_high_low_interlock()
         print(f"Toggling low beams. New state: {'ON' if self.low_beams_on else 'OFF'}")
-        if GPIO:
-            GPIO.output(LOW_BEAM_PIN, GPIO.HIGH) if self.low_beams_on else GPIO.output(LOW_BEAM_PIN, GPIO.LOW)
+        # Example (replace with your RPi.GPIO code):
+        # if self.low_beams_on:
+        #     GPIO.output(LOW_BEAM_PIN, GPIO.HIGH)
+        # else:
+        #     GPIO.output(LOW_BEAM_PIN, GPIO.LOW)
 
     def toggle_high_beams(self, instance, *args):  # Added *args
         # Placeholder: Replace with actual relay control logic
@@ -127,8 +121,11 @@ class RelayControlScreen(Screen):
         self.high_beam_image.source = self.get_icon('high', self.high_beams_on)
         self.update_high_low_interlock()
         print(f"Toggling high beams. New state: {'ON' if self.high_beams_on else 'OFF'}")
-        if GPIO:
-            GPIO.output(HIGH_BEAM_PIN, GPIO.HIGH) if self.high_beams_on else GPIO.output(HIGH_BEAM_PIN, GPIO.LOW)
+        # Example (replace with your RPi.GPIO code):
+        # if self.high_beams_on:
+        #     GPIO.output(HIGH_BEAM_PIN, GPIO.HIGH)
+        # else:
+        #     GPIO.output(HIGH_BEAM_PIN, GPIO.LOW)
 
     def update_high_low_interlock(self):
         # Ensure only one of high or low beams is on
@@ -136,29 +133,25 @@ class RelayControlScreen(Screen):
             if self.high_beams_on:
                 self.low_beams_on = False
                 self.low_beam_image.source = self.get_icon('low', self.low_beams_on)
-                if GPIO:
-                    GPIO.output(LOW_BEAM_PIN, GPIO.LOW)
+                # Placeholder: GPIO.output(LOW_BEAM_PIN, GPIO.LOW)
             elif self.low_beams_on:
                 self.high_beams_on = False
                 self.high_beam_image.source = self.get_icon('high', self.high_beams_on)
-                if GPIO:
-                    GPIO.output(HIGH_BEAM_PIN, GPIO.LOW)
+                # Placeholder: GPIO.output(HIGH_BEAM_PIN, GPIO.LOW)
 
-    def toggle_tail(self, instance, *args):
+    def toggle_tail(self, instance, *args):  # Added *args
         # Placeholder: Replace with actual relay control logic
         self.tail_on = not self.tail_on
         self.tail_image.source = self.get_icon('tail', self.tail_on)
         if self.haz_on:
             self.tail_image.disabled = self.tail_on  # Disable tail lights
-            if GPIO:
-                GPIO.output(TAIL_PIN, GPIO.LOW) if self.tail_on else GPIO.output(TAIL_PIN, GPIO.HIGH)
+            # Placeholder: GPIO.output(TAIL_PIN, GPIO.LOW) if self.tail_on else GPIO.output(TAIL_PIN, GPIO.HIGH)
         else:
             self.tail_image.disabled = False
-            if GPIO:
-                GPIO.output(TAIL_PIN, GPIO.HIGH) if self.tail_on else GPIO.output(TAIL_PIN, GPIO.LOW)
+            # Placeholder: GPIO.output(TAIL_PIN, GPIO.HIGH) if self.tail_on else GPIO.output(TAIL_PIN, GPIO.LOW)
         print(f"Toggling taillights. New state: {'ON' if self.tail_on else 'OFF'}")
 
-    def toggle_haz(self, instance, *args):
+    def toggle_haz(self, instance, *args):  # Added *args
         # Placeholder: Replace with actual relay control logic
         self.haz_on = not self.haz_on
         self.haz_image.source = self.get_icon('haz', self.haz_on)
@@ -172,11 +165,7 @@ class RelayControlScreen(Screen):
             self.tail_image.disabled = True
             self.vape_image.disabled = True
             print("Starting hazard lights")
-            if GPIO:
-                GPIO.output(LOW_BEAM_PIN, GPIO.LOW)
-                GPIO.output(HIGH_BEAM_PIN, GPIO.HIGH)
-                GPIO.output(TAIL_PIN, GPIO.HIGH)
-                GPIO.output(VAPE_PIN, GPIO.LOW)
+            # Placeholder: Start hazard light flashing
         else:
             # Stop flashing
             if self.flash_event:
@@ -190,6 +179,7 @@ class RelayControlScreen(Screen):
             self.update_all_buttons()
 
             print("Stopping hazard lights")
+            # Placeholder: Stop hazard light flashing
 
     def flash_hazard_lights(self, dt):
         # Placeholder: Implement hazard light flashing logic (e.g., using RPi.GPIO.output)
@@ -199,33 +189,30 @@ class RelayControlScreen(Screen):
             self.tail_on = not self.tail_on
             self.high_beam_image.source = self.get_icon('high', self.high_beams_on)
             self.tail_image.source = self.get_icon('tail', self.tail_on)
-            GPIO.output(HIGH_BEAM_PIN, GPIO.HIGH) if self.high_beams_on else GPIO.output(HIGH_BEAM_PIN, GPIO.LOW)
-            GPIO.output(TAIL_PIN, GPIO.HIGH) if self.tail_on else GPIO.output(TAIL_PIN, GPIO.LOW)
-        print("Flashing lights (Placeholder)")
+            # GPIO.output(HIGH_BEAM_PIN, GPIO.HIGH) if self.high_beams_on else GPIO.output(HIGH_BEAM_PIN, GPIO.LOW)
+            # GPIO.output(TAIL_PIN, GPIO.HIGH) if self.tail_on else GPIO.output(TAIL_PIN, GPIO.LOW)
+            print("Flashing lights (Placeholder)")
 
-    def toggle_horn(self, instance, *args):
+    def toggle_horn(self, instance, *args):  # Added *args
         # Placeholder: Implement momentary horn control
         self.horn_on = True  # Set to true on press
         self.horn_image.source = self.get_icon('horn', self.horn_on)
         print("Horn ON (Placeholder)")
-        if GPIO:
-            GPIO.output(HORN_PIN, GPIO.HIGH)  # Activate horn relay
+        # Placeholder: Activate horn relay
 
-    def horn_released(self, instance, *args):
+    def horn_released(self, instance, *args):  # Added *args
         # Placeholder: Implement momentary horn control
         self.horn_on = False  # Set to false on release
         self.horn_image.source = self.get_icon('horn', self.horn_on)
         print("Horn OFF (Placeholder)")
-        if GPIO:
-            GPIO.output(HORN_PIN, GPIO.LOW)  # Deactivate horn relay
+        # Placeholder: Deactivate horn relay
 
-    def toggle_vape(self, instance, *args):
+    def toggle_vape(self, instance, *args):  # Added *args
         # Placeholder: Replace with actual relay control logic
         self.vape_on = not self.vape_on
         self.vape_image.source = self.get_icon('vape', self.vape_on)
         print(f"Toggling vape. New state: {'ON' if self.vape_on else 'OFF'} (Placeholder)")
-        if GPIO:
-            GPIO.output(VAPE_PIN, GPIO.HIGH) if self.vape_on else GPIO.output(VAPE_PIN, GPIO.LOW)
+        # Placeholder: Replace with actual relay control logic
 
     def update_all_buttons(self):
         self.low_beam_image.source = self.get_icon('low', self.low_beams_on)
