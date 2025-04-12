@@ -17,7 +17,7 @@ Config.set('graphics', 'fullscreen', 'auto')
 Window.clearcolor = (0, 0, 0, 1)
 
 # Icon path
-icon_dir = Path(__file__).parent.parent / "icons"
+icon_dir = Path(__file__).parent / "icons"
 
 # GPIO pin assignments
 pins = {
