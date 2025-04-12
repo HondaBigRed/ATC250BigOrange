@@ -68,7 +68,7 @@ class RelayControlScreen(Screen):
 
         # --- Horn Control ---
         horn_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=100)
-        self.horn_on = BooleanProperty(False)  # Initial state is OFF
+        self.horn_on = BooleanProperty(False)  # Initial state is OFF
         self.horn_image = ImageButton(source=self.get_icon('horn', self.horn_on), size_hint_x=None, width=100)
         self.horn_image.bind(on_press=self.toggle_horn)
         self.horn_image.bind(on_release=self.horn_released)
