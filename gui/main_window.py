@@ -157,10 +157,12 @@ class RelayControlApp(App):
         self.tail_button.set_state(not toggle)
 
     def press_horn(self, *args):
+        self.horn_button.set_state(True)
         lgpio.gpio_write(chip, pins["horn_400"], 1)
         lgpio.gpio_write(chip, pins["horn_500"], 1)
 
     def release_horn(self, *args):
+        self.horn_button.set_state(False)
         lgpio.gpio_write(chip, pins["horn_400"], 0)
         lgpio.gpio_write(chip, pins["horn_500"], 0)
 
