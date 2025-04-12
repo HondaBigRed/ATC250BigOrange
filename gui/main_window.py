@@ -9,6 +9,7 @@ from kivy.clock import Clock
 from pathlib import Path
 import lgpio
 import os
+from time import time
 
 print(">>> DASH STARTING UP")
 
@@ -34,7 +35,7 @@ for name, pin in pins.items():
     if pin is not None:
         lgpio.gpio_claim_output(chip, pin, 0)
 
-# Button class
+# Button class with touch debounce
 class IconButton(ButtonBehavior, Image):
     def __init__(self, on_icon, off_icon, gpio_pin=None, **kwargs):
         super().__init__(**kwargs)
@@ -42,18 +43,30 @@ class IconButton(ButtonBehavior, Image):
         self.off_icon = off_icon
         self.gpio_pin = gpio_pin
         self.state_on = False
+        self.last_touch_time = 0
         self.update_icon()
 
-        self.last_touch_time = 0  # used for debounce
-
     def on_release(self):
-        # Simple debounce to prevent double-triggers from touchscreen jitter
-        from time import time
         now = time()
-        if now - self.last_touch_time < 0.25:  # 250ms debounce
+        if now - self.last_touch_time < 0.25:
             return
         self.last_touch_time = now
         self.toggle()
+
+    def toggle(self):
+        self.state_on = not self.state_on
+        self.update_icon()
+        if self.gpio_pin is not None:
+            lgpio.gpio_write(chip, self.gpio_pin, 1 if self.state_on else 0)
+
+    def set_state(self, state: bool):
+        self.state_on = state
+        self.update_icon()
+        if self.gpio_pin is not None:
+            lgpio.gpio_write(chip, self.gpio_pin, 1 if state else 0)
+
+    def update_icon(self):
+        self.source = self.on_icon if self.state_on else self.off_icon
 
 # App class
 class RelayControlApp(App):
@@ -92,10 +105,10 @@ class RelayControlApp(App):
             off_icon=str(icon_dir / "haz_off.png"),
             gpio_pin=None
         )
-        self.hazard_button.on_press = self.toggle_hazards
+        self.hazard_button.on_release = self.toggle_hazards
 
-        self.low_button.on_press = self.low_beam_pressed
-        self.high_button.on_press = self.high_beam_pressed
+        self.low_button.on_release = self.low_beam_pressed
+        self.high_button.on_release = self.high_beam_pressed
 
         layout.add_widget(self.low_button)
         layout.add_widget(self.high_button)
@@ -105,17 +118,17 @@ class RelayControlApp(App):
 
         return layout
 
-    def low_beam_pressed(self):
+    def low_beam_pressed(self, *args):
         self.low_button.set_state(True)
         self.high_button.set_state(False)
         self.tail_button.set_state(True)
 
-    def high_beam_pressed(self):
+    def high_beam_pressed(self, *args):
         self.high_button.set_state(True)
         self.low_button.set_state(False)
         self.tail_button.set_state(True)
 
-    def toggle_hazards(self):
+    def toggle_hazards(self, *args):
         self.hazard_state = not self.hazard_state
         self.hazard_button.set_state(self.hazard_state)
 
@@ -138,6 +151,5 @@ class RelayControlApp(App):
                 lgpio.gpio_write(chip, pin, 0)
         lgpio.gpiochip_close(chip)
 
-# Run the app
 if __name__ == '__main__':
     RelayControlApp().run()
