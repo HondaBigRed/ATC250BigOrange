@@ -75,15 +75,6 @@ class RelayControlApp(App):
     def build(self):
         self.hazard_state = False
         self.hazard_timer = None
-        self.horn_pressed_time = None
-        self.horn_sequence_event = None
-        self.horn_sequence_index = 0
-        self.horn_pattern = [
-            (1, 1, 0.25), (0, 0, 0.1),
-            (1, 1, 0.25), (0, 0, 0.1),
-            (1, 1, 0.25), (0, 0, 0.1),
-            (1, 1, 0.4), (0, 0, 0.25)
-        ]
 
         layout = BoxLayout(orientation='horizontal', padding=10, spacing=10)
 
@@ -123,8 +114,8 @@ class RelayControlApp(App):
             off_icon=str(icon_dir / "horn_off.png"),
             gpio_pin=None
         )
-        self.horn_button.on_press = self.start_horn_press
-        self.horn_button.on_release = self.end_horn_press
+        self.horn_button.on_press = self.press_horn
+        self.horn_button.on_release = self.release_horn
 
         self.low_button.on_release = self.low_beam_pressed
         self.high_button.on_release = self.high_beam_pressed
@@ -165,39 +156,13 @@ class RelayControlApp(App):
         self.high_button.set_state(toggle)
         self.tail_button.set_state(not toggle)
 
-    def start_horn_press(self, *args):
-        self.horn_pressed_time = time()
+    def press_horn(self, *args):
+        lgpio.gpio_write(chip, pins["horn_400"], 1)
+        lgpio.gpio_write(chip, pins["horn_500"], 1)
 
-    def end_horn_press(self, *args):
-        held_time = time() - self.horn_pressed_time if self.horn_pressed_time else 0
-        self.horn_pressed_time = None
-        if held_time < 1:
-            self.start_horn_sequence(loop=False)
-        else:
-            self.start_horn_sequence(loop=True)
-
-    def start_horn_sequence(self, loop=False):
-        self.horn_sequence_index = 0
-        self.horn_loop = loop
-        self.horn_sequence_event = Clock.schedule_once(self.run_horn_step, 0)
-
-    def run_horn_step(self, dt):
-        if self.horn_sequence_index >= len(self.horn_pattern):
-            if self.horn_loop:
-                self.horn_sequence_index = 0
-                Clock.schedule_once(self.run_horn_step, 0)
-            else:
-                self.set_horn_output(0, 0)
-                return
-        else:
-            a, b, duration = self.horn_pattern[self.horn_sequence_index]
-            self.set_horn_output(a, b)
-            self.horn_sequence_index += 1
-            Clock.schedule_once(self.run_horn_step, duration)
-
-    def set_horn_output(self, horn400, horn500):
-        lgpio.gpio_write(chip, pins["horn_400"], horn400)
-        lgpio.gpio_write(chip, pins["horn_500"], horn500)
+    def release_horn(self, *args):
+        lgpio.gpio_write(chip, pins["horn_400"], 0)
+        lgpio.gpio_write(chip, pins["horn_500"], 0)
 
     def on_stop(self):
         for pin in pins.values():
