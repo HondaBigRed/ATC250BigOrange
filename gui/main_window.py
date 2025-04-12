@@ -79,10 +79,10 @@ class RelayControlApp(App):
         self.horn_sequence_event = None
         self.horn_sequence_index = 0
         self.horn_pattern = [
-            (1, 1, 0.2), (0, 0, 0.15),
-            (1, 1, 0.2), (0, 0, 0.15),
-            (1, 0, 0.1), (0, 1, 0.1),
-            (1, 1, 0.3), (0, 0, 0.2)
+            (1, 1, 0.25), (0, 0, 0.1),
+            (1, 1, 0.25), (0, 0, 0.1),
+            (1, 1, 0.25), (0, 0, 0.1),
+            (1, 1, 0.4), (0, 0, 0.25)
         ]
 
         layout = BoxLayout(orientation='horizontal', padding=10, spacing=10)
