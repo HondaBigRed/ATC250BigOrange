@@ -9,14 +9,13 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.behaviors import ButtonBehavior  # Import ButtonBehavior
 
 
-ICONS_DIR = os.path.join(os.path.dirname(__file__), 'icons')  # Consistent icon directory
-
-
 class ImageButton(ButtonBehavior, Image):  # Create a custom ImageButton
     pass
 
 
 class RelayControlScreen(Screen):
+    ICONS_DIR = os.path.join(os.path.dirname(__file__), 'icons')  # Class-level attribute
+
     low_beams_on = BooleanProperty(False)
     high_beams_on = BooleanProperty(False)
     tail_on = BooleanProperty(True)  # Initial state is ON
@@ -98,10 +97,10 @@ class RelayControlScreen(Screen):
 
     def get_icon(self, control_name, state):
         try:
-            return os.path.join(self.ICONS_DIR, f'{control_name}_{"on" if state else "off"}.png')
+            return os.path.join(RelayControlScreen.ICONS_DIR, f'{control_name}_{"on" if state else "off"}.png')  # Corrected
         except FileNotFoundError:
             print(f"Icon file not found for {control_name}, using default.")
-            return os.path.join(self.ICONS_DIR, 'default.png')  # Replace 'default.png' with a placeholder
+            return os.path.join(RelayControlScreen.ICONS_DIR, 'default.png')  # Corrected
 
     def toggle_low_beams(self, instance, *args):  # Added *args
         # Placeholder: Replace with actual relay control logic
@@ -193,21 +192,21 @@ class RelayControlScreen(Screen):
             # GPIO.output(TAIL_PIN, GPIO.HIGH) if self.tail_on else GPIO.output(TAIL_PIN, GPIO.LOW)
             print("Flashing lights (Placeholder)")
 
-    def toggle_horn(self, instance, *args):  # Added *args
+    def toggle_horn(self, instance, *args):
         # Placeholder: Implement momentary horn control
         self.horn_on = True  # Set to true on press
         self.horn_image.source = self.get_icon('horn', self.horn_on)
         print("Horn ON (Placeholder)")
         # Placeholder: Activate horn relay
 
-    def horn_released(self, instance, *args):  # Added *args
+    def horn_released(self, instance, *args):
         # Placeholder: Implement momentary horn control
         self.horn_on = False  # Set to false on release
         self.horn_image.source = self.get_icon('horn', self.horn_on)
         print("Horn OFF (Placeholder)")
         # Placeholder: Deactivate horn relay
 
-    def toggle_vape(self, instance, *args):  # Added *args
+    def toggle_vape(self, instance, *args):
         # Placeholder: Replace with actual relay control logic
         self.vape_on = not self.vape_on
         self.vape_image.source = self.get_icon('vape', self.vape_on)
