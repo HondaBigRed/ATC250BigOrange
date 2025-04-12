@@ -44,24 +44,16 @@ class IconButton(ButtonBehavior, Image):
         self.state_on = False
         self.update_icon()
 
-    def on_press(self):
+        self.last_touch_time = 0  # used for debounce
+
+    def on_release(self):
+        # Simple debounce to prevent double-triggers from touchscreen jitter
+        from time import time
+        now = time()
+        if now - self.last_touch_time < 0.25:  # 250ms debounce
+            return
+        self.last_touch_time = now
         self.toggle()
-
-    def toggle(self):
-        self.state_on = not self.state_on
-        self.update_icon()
-
-        if self.gpio_pin is not None:
-            lgpio.gpio_write(chip, self.gpio_pin, 1 if self.state_on else 0)
-
-    def set_state(self, state: bool):
-        self.state_on = state
-        self.update_icon()
-        if self.gpio_pin is not None:
-            lgpio.gpio_write(chip, self.gpio_pin, 1 if state else 0)
-
-    def update_icon(self):
-        self.source = self.on_icon if self.state_on else self.off_icon
 
 # App class
 class RelayControlApp(App):
