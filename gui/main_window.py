@@ -1,22 +1,21 @@
-import os
+import os.path
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.clock import Clock
-from kivy.properties import BooleanProperty
+from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.behaviors import ButtonBehavior  # Import ButtonBehavior
 
 
-ICONS_DIR = os.path.join(os.path.dirname(__file__), 'icons')  # Consistent icon directory
-
-
-class ImageButton(ButtonBehavior, Image):
+class ImageButton(ButtonBehavior, Image):  # Create a custom ImageButton
     pass
 
 
 class RelayControlScreen(Screen):
+    ICONS_DIR = os.path.join(os.path.dirname(__file__), 'icons')  # Class-level attribute
+
     low_beams_on = BooleanProperty(False)
     high_beams_on = BooleanProperty(False)
     tail_on = BooleanProperty(True)  # Initial state is ON
@@ -48,7 +47,7 @@ class RelayControlScreen(Screen):
 
         # --- High Beam Control ---
         high_beam_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=100)
-        self.high_beams_on = BooleanProperty(False)
+        self.high_beams_on = BooleanProperty(False)  # Initial state is OFF
         self.high_beam_image = ImageButton(source=self.get_icon('high', self.high_beams_on), size_hint_x=None, width=100)
         self.high_beam_image.bind(on_press=self.toggle_high_beams)
         high_beam_box.add_widget(self.high_beam_image)
@@ -98,12 +97,12 @@ class RelayControlScreen(Screen):
 
     def get_icon(self, control_name, state):
         try:
-            return os.path.join(self.ICONS_DIR, f'{control_name}_{"on" if state else "off"}.png')
+            return os.path.join(RelayControlScreen.ICONS_DIR, f'{control_name}_{"on" if state else "off"}.png')
         except FileNotFoundError:
             print(f"Icon file not found for {control_name}, using default.")
-            return os.path.join(self.ICONS_DIR, 'default.png')  # Replace 'default.png' with a placeholder
+            return os.path.join(RelayControlScreen.ICONS_DIR, 'default.png')  # Replace 'default.png' with a placeholder
 
-    def toggle_low_beams(self, instance, *args):
+    def toggle_low_beams(self, instance, *args):  # Added *args
         # Placeholder: Replace with actual relay control logic
         self.low_beams_on = not self.low_beams_on
         self.low_beam_image.source = self.get_icon('low', self.low_beams_on)
@@ -115,7 +114,7 @@ class RelayControlScreen(Screen):
         # else:
         #     GPIO.output(LOW_BEAM_PIN, GPIO.LOW)
 
-    def toggle_high_beams(self, instance, *args):
+    def toggle_high_beams(self, instance, *args):  # Added *args
         # Placeholder: Replace with actual relay control logic
         self.high_beams_on = not self.high_beams_on
         self.high_beam_image.source = self.get_icon('high', self.high_beams_on)
@@ -139,7 +138,10 @@ class RelayControlScreen(Screen):
                 self.high_beam_image.source = self.get_icon('high', self.high_beams_on)
                 # Placeholder: GPIO.output(HIGH_BEAM_PIN, GPIO.LOW)
 
-    def toggle_tail(self, instance, *args):
+    def get_tail_icon(self):
+        return os.path.join(os.path.dirname(__file__), 'icons/tail_on.png' if self.tail_on else 'icons/tail_off.png')
+
+    def toggle_tail(self, instance, *args):  # Added *args
         # Placeholder: Replace with actual relay control logic
         self.tail_on = not self.tail_on
         self.tail_image.source = self.get_icon('tail', self.tail_on)
@@ -150,8 +152,13 @@ class RelayControlScreen(Screen):
             self.tail_image.disabled = False
             # Placeholder: GPIO.output(TAIL_PIN, GPIO.HIGH) if self.tail_on else GPIO.output(TAIL_PIN, GPIO.LOW)
         print(f"Toggling taillights. New state: {'ON' if self.tail_on else 'OFF'}")
+        # Placeholder: Replace with actual relay control logic
 
-    def toggle_haz(self, instance, *args):
+    def get_haz_icon(self):
+        return os.path.join(os.path.dirname(__file__),
+                            'icons/haz_on.png' if self.haz_on else 'icons/haz_off.png')
+
+    def toggle_haz(self, instance, *args):  # Added *args
         # Placeholder: Replace with actual relay control logic
         self.haz_on = not self.haz_on
         self.haz_image.source = self.get_icon('haz', self.haz_on)
@@ -159,7 +166,7 @@ class RelayControlScreen(Screen):
         if self.haz_on:
             # Start flashing
             self.flash_event = Clock.schedule_interval(self.flash_hazard_lights, 0.5)  # 2Hz
-            # Disable other controls
+            # Disable other buttons
             self.low_beam_image.disabled = True
             self.high_beam_image.disabled = True
             self.tail_image.disabled = True
@@ -171,7 +178,7 @@ class RelayControlScreen(Screen):
             if self.flash_event:
                 Clock.unschedule(self.flash_event)
                 self.flash_event = None
-            # Re-enable other controls
+            # Re-enable other buttons
             self.low_beam_image.disabled = False
             self.high_beam_image.disabled = False
             self.tail_image.disabled = False
@@ -194,14 +201,14 @@ class RelayControlScreen(Screen):
         return os.path.join(os.path.dirname(__file__),
                             'icons/horn_on.png' if self.horn_on else 'icons/horn_off.png')
 
-    def toggle_horn(self, instance, *args):
+    def toggle_horn(self, instance, *args):  # Added *args
         # Placeholder: Implement momentary horn control
         self.horn_on = True  # Set to true on press
         self.horn_image.source = self.get_icon('horn', self.horn_on)
         print("Horn ON (Placeholder)")
         # Placeholder: Activate horn relay
 
-    def horn_released(self, instance, *args):
+    def horn_released(self, instance, *args):  # Added *args
         self.horn_on = False  # Set to false on release
         self.horn_image.source = self.get_icon('horn', self.horn_on)
         print("Horn OFF (Placeholder)")
@@ -211,7 +218,7 @@ class RelayControlScreen(Screen):
         return os.path.join(os.path.dirname(__file__),
                             'icons/vape_on.png' if self.vape_on else 'icons/vape_off.png')
 
-    def toggle_vape(self, instance, *args):
+    def toggle_vape(self, instance, *args):  # Added *args
         # Placeholder: Replace with actual relay control logic
         self.vape_on = not self.vape_on
         self.vape_image.source = self.get_icon('vape', self.vape_on)
@@ -223,8 +230,9 @@ class RelayControlScreen(Screen):
         self.high_beam_image.source = self.get_icon('high', self.high_beams_on)
         self.tail_image.source = self.get_icon('tail', self.tail_on)
         self.haz_image.source = self.get_icon('haz', self.haz_on)
-        self.horn_image.source = self.get_horn_icon()
-        self.vape_image.source = self.get_vape_icon()
+        self.horn_image.source = self.get_icon('horn', self.horn_on)
+        self.vape_image.source = self.get_icon('vape', self.vape_on)
+
 
 class MainApp(App):
     def build(self):
