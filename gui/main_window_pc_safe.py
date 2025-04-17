@@ -24,7 +24,7 @@ else:
         def gpiochip_close(self, *args, **kwargs): pass
     lgpio = MockGPIO()
     chip = None
-     lgpio.gpiochip_open(0)
+    lgpio.gpiochip_open(0)
 for name, pin in pins.items():
     if pin is not None:
         lgpio.gpio_claim_output(chip, pin, 0)
