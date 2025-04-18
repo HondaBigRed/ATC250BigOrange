@@ -1,6 +1,6 @@
 # [Merged GUI with ScreenManager and Dashboard]
 from kivy.app import App
-from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
+from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition, SwipeTransition
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
@@ -158,7 +158,7 @@ class DashboardScreen(Screen):
 
 class ATCDashApp(App):
     def build(self):
-        self.sm = ScreenManager(transition=SwapTransition())
+        self.sm = ScreenManager(transition=SwipeTransition())
         self.relay_screen = RelayControlScreen(name='relays')
         self.dashboard_screen = DashboardScreen(name='dashboard')
         self.sm.add_widget(self.relay_screen)
