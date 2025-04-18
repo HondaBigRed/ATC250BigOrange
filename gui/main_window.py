@@ -166,7 +166,6 @@ WHEEL_CIRCUMFERENCE_M = 1.6  # adjust as needed
 PULSES_PER_REV = 1
 lgpio.gpio_set_alert_func(chip, 17, on_pulse)
 
-    for a in alerts:
         chip, gpio, level, tick = a
         if level == 0:
         self.pulse_count += 1
