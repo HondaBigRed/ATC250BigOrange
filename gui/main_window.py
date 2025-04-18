@@ -1,13 +1,10 @@
-# [Merged GUI with ScreenManager and Dashboard]
+# [Merged GUI with ScreenManager and Dashboard + Hall Effect Speed Sensor]
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.clock import Clock
-import pigpio
-pi = pigpio.pi()
-import time
 from kivy.uix.image import Image
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.config import Config
@@ -15,7 +12,7 @@ from kivy.core.window import Window
 from pathlib import Path
 import pigpio
 import os
-from time import time
+import time
 
 print(">>> DASH STARTING UP")
 
@@ -24,6 +21,7 @@ Window.clearcolor = (0, 0, 0, 1)
 
 icon_dir = Path(__file__).parent / "icons"
 
+# GPIO setup
 pins = {
     "low": 4,
     "high": 26,
@@ -37,7 +35,8 @@ pins = {
 pi = pigpio.pi()
 for name, pin in pins.items():
     if pin is not None:
-        lgpio.gpio_claim_output(chip, pin, 0)
+        pi.set_mode(pin, pigpio.OUTPUT)
+        pi.write(pin, 0)
 
 class IconButton(ButtonBehavior, Image):
     def __init__(self, on_icon, off_icon, gpio_pin=None, **kwargs):
@@ -50,7 +49,7 @@ class IconButton(ButtonBehavior, Image):
         self.update_icon()
 
     def on_release(self):
-        now = time()
+        now = time.time()
         if now - self.last_touch_time < 0.25:
             return
         self.last_touch_time = now
@@ -60,13 +59,13 @@ class IconButton(ButtonBehavior, Image):
         self.state_on = not self.state_on
         self.update_icon()
         if self.gpio_pin is not None:
-            lgpio.gpio_write(chip, self.gpio_pin, 1 if self.state_on else 0)
+            pi.write(self.gpio_pin, 1 if self.state_on else 0)
 
     def set_state(self, state: bool):
         self.state_on = state
         self.update_icon()
         if self.gpio_pin is not None:
-            lgpio.gpio_write(chip, self.gpio_pin, 1 if state else 0)
+            pi.write(self.gpio_pin, 1 if state else 0)
 
     def update_icon(self):
         self.source = self.on_icon if self.state_on else self.off_icon
@@ -128,14 +127,13 @@ class RelayControlScreen(Screen):
 
     def press_horn(self, *args):
         self.horn_button.set_state(True)
-        lgpio.gpio_write(chip, pins["horn_400"], 1)
-        lgpio.gpio_write(chip, pins["horn_500"], 1)
+        pi.write(pins["horn_400"], 1)
+        pi.write(pins["horn_500"], 1)
 
     def release_horn(self, *args):
         self.horn_button.set_state(False)
-        lgpio.gpio_write(chip, pins["horn_400"], 0)
-        lgpio.gpio_write(chip, pins["horn_500"], 0)
-
+        pi.write(pins["horn_400"], 0)
+        pi.write(pins["horn_500"], 0)
 
 class DashboardScreen(Screen):
     def __init__(self, **kwargs):
@@ -158,30 +156,12 @@ class DashboardScreen(Screen):
         self.gear_label.text = f"Gear: {gear}"
         self.temp_label.text = f"Head Temp: {head_temp}°C"
 
-
-
-# Setup GPIO for Hall Effect Sensor
-HALL_GPIO = 17  # GPIO pin for Hall sensor
-WHEEL_CIRCUMFERENCE_M = 1.6  # adjust as needed
-PULSES_PER_REV = 1
-lgpio.gpio_set_alert_func(chip, 17, on_pulse)
-
-        chip, gpio, level, tick = a
-        if level == 0:
-        self.pulse_count += 1
-    app = App.get_running_app()
-    if level == 0:
-        app.pulse_count += 1
-    if level == 0:
-        pulse_count += 1
-    pulse_count += 1
-
-
 class ATCDashApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.pulse_count = 0
         self.last_time = time.time()
+
     def build(self):
         self.sm = ScreenManager(transition=SwapTransition())
         self.relay_screen = RelayControlScreen(name='relays')
@@ -195,11 +175,12 @@ class ATCDashApp(App):
         root.add_widget(toggle_btn)
         root.add_widget(self.sm)
 
-        Clock.schedule_interval(self.poll_hall_sensor, 0.05)
+        # Setup hall effect input
         pi.set_mode(17, pigpio.INPUT)
         pi.set_pull_up_down(17, pigpio.PUD_UP)
         pi.callback(17, pigpio.FALLING_EDGE, lambda gpio, level, tick: self.increment_pulse())
-        Clock.schedule_interval(self.update_speed, 1)
+
+        Clock.schedule_interval(self.update_speed, 1.0)
         return root
 
     def toggle_screen(self, *args):
@@ -210,30 +191,21 @@ class ATCDashApp(App):
 
     def update_speed(self, dt):
         now = time.time()
-        elapsed = now - last_time
-        last_time = now
-        rotations = pulse_count / PULSES_PER_REV
-        distance_m = rotations * WHEEL_CIRCUMFERENCE_M
+        elapsed = now - self.last_time
+        self.last_time = now
+        rotations = self.pulse_count / 1  # PULSES_PER_REV
+        distance_m = rotations * 1.6  # WHEEL_CIRCUMFERENCE_M
         speed_mps = distance_m / elapsed
         speed_mph = speed_mps * 2.23694
+        self.pulse_count = 0
         self.dashboard_screen.update_dashboard(
             speed=int(speed_mph), rpm=3100, afr=14.2, gear='3', head_temp=132
         )
 
-    def mock_sensor_data(self, dt):
-        speed = 25
-        rpm = 3100
-        afr = 14.2
-        gear = "3"
-        head_temp = 132
-        self.dashboard_screen.update_dashboard(speed, rpm, afr, gear, head_temp)
-
     def on_stop(self):
         for pin in pins.values():
             if pin is not None:
-                lgpio.gpio_write(chip, pin, 0)
-        lgpio.gpiochip_close(chip)
-
+                pi.write(pin, 0)
 
 if __name__ == '__main__':
     ATCDashApp().run()
