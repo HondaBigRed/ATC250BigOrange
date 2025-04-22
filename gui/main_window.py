@@ -5,6 +5,7 @@ from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
+from kivy.uix.progressbar import ProgressBar
 from kivy.uix.image import Image
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.clock import Clock
@@ -136,45 +137,53 @@ class DashboardScreen(Screen):
         super().__init__(**kwargs)
         layout = BoxLayout(orientation='vertical', spacing=10, padding=20)
 
-        # Top RPM bar (simulated visual bar)
-        self.rpm_bar = Label(text="RPM Bar: [--------]", font_size=20)
+        # RPM Bar styled like TS Dash
+        self.rpm_bar = ProgressBar(max=7000, value=0, size_hint_y=0.08)
         layout.add_widget(self.rpm_bar)
 
-        # Middle row: Speed, RPM, AFR, Gear
-        mid_row = BoxLayout(orientation='horizontal', spacing=20)
-        self.speed_label = Label(text="Speed: 0 MPH", font_size=24)
-        self.rpm_label = Label(text="RPM: 0", font_size=24)
-        self.afr_label = Label(text="AFR: 14.7", font_size=24)
-        self.gear_label = Label(text="Gear: N", font_size=24)
+        # Middle section for Speed, RPM, AFR, Gear
+        mid_row = BoxLayout(orientation='horizontal', spacing=40, size_hint_y=0.45)
+        self.speed_label = Label(text="Speed
+0 MPH", font_size='28sp', halign='center')
+        self.rpm_label = Label(text="RPM
+0", font_size='28sp', halign='center')
+        self.afr_label = Label(text="AFR
+14.7", font_size='28sp', halign='center')
+        self.gear_label = Label(text="Gear
+N", font_size='28sp', halign='center')
         for widget in [self.speed_label, self.rpm_label, self.afr_label, self.gear_label]:
+            widget.bind(size=widget.setter('text_size'))
             mid_row.add_widget(widget)
         layout.add_widget(mid_row)
 
-        # Bottom row: Temps
-        bottom_row = BoxLayout(orientation='horizontal', spacing=20)
-        self.temp_label = Label(text="Head Temp: 0°C", font_size=24)
-        self.egt_label = Label(text="EGT: 0°C", font_size=24)
+        # Bottom section for Temps
+        bottom_row = BoxLayout(orientation='horizontal', spacing=40, size_hint_y=0.35)
+        self.temp_label = Label(text="Head Temp
+0°C", font_size='26sp', halign='center')
+        self.egt_label = Label(text="EGT
+0°C", font_size='26sp', halign='center')
         for widget in [self.temp_label, self.egt_label]:
+            widget.bind(size=widget.setter('text_size'))
             bottom_row.add_widget(widget)
         layout.add_widget(bottom_row)
 
         self.add_widget(layout)
 
     def update_dashboard(self, speed, rpm, afr, gear, head_temp):
-        # Simulate EGT from head temp (for now)
         egt = head_temp + 300
-
-        # RPM bar visual approximation (text-based)
-        rpm_level = min(int((rpm / 7000) * 10), 10)
-        rpm_bar_text = '[' + ('#' * rpm_level).ljust(10, '-') + ']'
-        self.rpm_bar.text = f"RPM Bar: {rpm_bar_text}"
-
-        self.speed_label.text = f"Speed: {speed} MPH"
-        self.rpm_label.text = f"RPM: {rpm}"
-        self.afr_label.text = f"AFR: {afr:.2f}"
-        self.gear_label.text = f"Gear: {gear}"
-        self.temp_label.text = f"Head Temp: {head_temp}°C"
-        self.egt_label.text = f"EGT: {egt}°C"
+        self.rpm_bar.value = rpm
+        self.speed_label.text = f"Speed
+{speed} MPH"
+        self.rpm_label.text = f"RPM
+{rpm}"
+        self.afr_label.text = f"AFR
+{afr:.2f}"
+        self.gear_label.text = f"Gear
+{gear}"
+        self.temp_label.text = f"Head Temp
+{head_temp}°C"
+        self.egt_label.text = f"EGT
+{egt}°C"
 
 class ATCDashApp(App):
     def __init__(self, **kwargs):
