@@ -1,90 +1,89 @@
-# [Merged GUI with ScreenManager and Dashboard]
+import os
+os.environ['KIVY_NO_ARGS'] = '1'
+
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
-from kivy.uix.button import Button
-from kivy.clock import Clock
 from kivy.uix.image import Image
 from kivy.uix.behaviors import ButtonBehavior
-from kivy.config import Config
+from kivy.uix.button import Button
+from kivy.clock import Clock
 from kivy.core.window import Window
+from functools import partial
 from pathlib import Path
 import lgpio
-import os
-from time import time
+import time
+
+# Constants
+CHIP = lgpio.gpiochip_open(0)
+ICON_DIR = Path(__file__).resolve().parent / "icons"
+WHEEL_CIRCUMFERENCE_M = 1.6
+PULSES_PER_REV = 1
+HALL_GPIO = 17
 
 print(">>> DASH STARTING UP")
 
-Config.set('graphics', 'fullscreen', 'auto')
-Window.clearcolor = (0, 0, 0, 1)
-
-icon_dir = Path(__file__).parent / "icons"
-
-pins = {
+# Setup all relay output pins
+PINS = {
     "low": 4,
     "high": 26,
     "tail": 27,
     "vape": 22,
     "hazards": None,
     "horn_500": 21,
-    "horn_400": 13
+    "horn_400": 13,
 }
 
-chip = lgpio.gpiochip_open(0)
-for name, pin in pins.items():
+for pin in PINS.values():
     if pin is not None:
-        lgpio.gpio_claim_output(chip, pin, 0)
+        lgpio.gpio_claim_output(CHIP, pin, 0)
+
+def load_icon(path):
+    return str(path) if Path(path).exists() else str(ICON_DIR / "default.png")
 
 class IconButton(ButtonBehavior, Image):
     def __init__(self, on_icon, off_icon, gpio_pin=None, **kwargs):
         super().__init__(**kwargs)
-        self.on_icon = on_icon
-        self.off_icon = off_icon
+        self.on_icon = load_icon(on_icon)
+        self.off_icon = load_icon(off_icon)
         self.gpio_pin = gpio_pin
         self.state_on = False
-        self.last_touch_time = 0
-        self.update_icon()
+        self.source = self.off_icon
+        if self.gpio_pin is not None:
+            lgpio.gpio_claim_output(CHIP, self.gpio_pin, 0)
 
-    def on_release(self):
-        now = time()
-        if now - self.last_touch_time < 0.25:
-            return
-        self.last_touch_time = now
+    def on_press(self):
         self.toggle()
 
     def toggle(self):
         self.state_on = not self.state_on
-        self.update_icon()
+        self.source = self.on_icon if self.state_on else self.off_icon
         if self.gpio_pin is not None:
-            lgpio.gpio_write(chip, self.gpio_pin, 1 if self.state_on else 0)
+            lgpio.gpio_write(CHIP, self.gpio_pin, int(self.state_on))
 
     def set_state(self, state: bool):
         self.state_on = state
-        self.update_icon()
+        self.source = self.on_icon if state else self.off_icon
         if self.gpio_pin is not None:
-            lgpio.gpio_write(chip, self.gpio_pin, 1 if state else 0)
-
-    def update_icon(self):
-        self.source = self.on_icon if self.state_on else self.off_icon
+            lgpio.gpio_write(CHIP, self.gpio_pin, int(state))
 
 class RelayControlScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        layout = BoxLayout(orientation='horizontal', padding=10, spacing=10)
+        layout = BoxLayout(orientation='horizontal', spacing=10, padding=10)
 
-        self.low_button = IconButton(str(icon_dir / "low_on.png"), str(icon_dir / "low_off.png"), gpio_pin=pins["low"])
-        self.high_button = IconButton(str(icon_dir / "high_on.png"), str(icon_dir / "high_off.png"), gpio_pin=pins["high"])
-        self.tail_button = IconButton(str(icon_dir / "tail_on.png"), str(icon_dir / "tail_off.png"), gpio_pin=pins["tail"])
-        self.vape_button = IconButton(str(icon_dir / "vape_on.png"), str(icon_dir / "vape_off.png"), gpio_pin=pins["vape"])
-        self.hazard_button = IconButton(str(icon_dir / "haz_on.png"), str(icon_dir / "haz_off.png"))
-        self.horn_button = IconButton(str(icon_dir / "horn_on.png"), str(icon_dir / "horn_off.png"))
+        self.low_button = IconButton(ICON_DIR / "low_on.png", ICON_DIR / "low_off.png", gpio_pin=PINS["low"])
+        self.high_button = IconButton(ICON_DIR / "high_on.png", ICON_DIR / "high_off.png", gpio_pin=PINS["high"])
+        self.tail_button = IconButton(ICON_DIR / "tail_on.png", ICON_DIR / "tail_off.png", gpio_pin=PINS["tail"])
+        self.vape_button = IconButton(ICON_DIR / "vape_on.png", ICON_DIR / "vape_off.png", gpio_pin=PINS["vape"])
+        self.hazard_button = IconButton(ICON_DIR / "haz_on.png", ICON_DIR / "haz_off.png")
+        self.horn_button = IconButton(ICON_DIR / "horn_on.png", ICON_DIR / "horn_off.png")
 
-        self.low_button.on_release = self.low_beam_pressed
-        self.high_button.on_release = self.high_beam_pressed
-        self.hazard_button.on_release = self.toggle_hazards
-        self.horn_button.on_press = self.press_horn
-        self.horn_button.on_release = self.release_horn
+        self.low_button.on_press = self.low_beam_pressed
+        self.high_button.on_press = self.high_beam_pressed
+        self.hazard_button.on_press = self.toggle_hazards
+        self.horn_button.bind(on_press=self.press_horn, on_release=self.release_horn)
 
         layout.add_widget(self.low_button)
         layout.add_widget(self.high_button)
@@ -92,6 +91,7 @@ class RelayControlScreen(Screen):
         layout.add_widget(self.vape_button)
         layout.add_widget(self.hazard_button)
         layout.add_widget(self.horn_button)
+
         self.add_widget(layout)
 
         self.hazard_state = False
@@ -125,14 +125,13 @@ class RelayControlScreen(Screen):
 
     def press_horn(self, *args):
         self.horn_button.set_state(True)
-        lgpio.gpio_write(chip, pins["horn_400"], 1)
-        lgpio.gpio_write(chip, pins["horn_500"], 1)
+        lgpio.gpio_write(CHIP, PINS["horn_400"], 1)
+        lgpio.gpio_write(CHIP, PINS["horn_500"], 1)
 
     def release_horn(self, *args):
         self.horn_button.set_state(False)
-        lgpio.gpio_write(chip, pins["horn_400"], 0)
-        lgpio.gpio_write(chip, pins["horn_500"], 0)
-
+        lgpio.gpio_write(CHIP, PINS["horn_400"], 0)
+        lgpio.gpio_write(CHIP, PINS["horn_500"], 0)
 
 class DashboardScreen(Screen):
     def __init__(self, **kwargs):
@@ -155,8 +154,12 @@ class DashboardScreen(Screen):
         self.gear_label.text = f"Gear: {gear}"
         self.temp_label.text = f"Head Temp: {head_temp}°C"
 
-
 class ATCDashApp(App):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.pulse_count = 0
+        self.last_time = time.time()
+
     def build(self):
         self.sm = ScreenManager(transition=SwapTransition())
         self.relay_screen = RelayControlScreen(name='relays')
@@ -170,26 +173,39 @@ class ATCDashApp(App):
         root.add_widget(toggle_btn)
         root.add_widget(self.sm)
 
-        Clock.schedule_interval(self.mock_sensor_data, 1)
+        Clock.schedule_interval(self.update_speed, 1)
+        Clock.schedule_interval(self.poll_hall_sensor, 0.05)
+
         return root
 
     def toggle_screen(self, *args):
         self.sm.current = 'dashboard' if self.sm.current == 'relays' else 'relays'
 
-    def mock_sensor_data(self, dt):
-        speed = 25
-        rpm = 3100
-        afr = 14.2
-        gear = "3"
-        head_temp = 132
-        self.dashboard_screen.update_dashboard(speed, rpm, afr, gear, head_temp)
+    def poll_hall_sensor(self, dt):
+        level = lgpio.gpio_read(CHIP, HALL_GPIO)
+        if level == 0:
+            self.pulse_count += 1
+
+    def update_speed(self, dt):
+        now = time.time()
+        elapsed = now - self.last_time
+        self.last_time = now
+        rotations = self.pulse_count / PULSES_PER_REV
+        distance_m = rotations * WHEEL_CIRCUMFERENCE_M
+        speed_mps = distance_m / elapsed if elapsed else 0
+        speed_mph = speed_mps * 2.23694
+        self.pulse_count = 0
+
+        self.dashboard_screen.update_dashboard(
+            speed=int(speed_mph), rpm=3100, afr=14.2, gear='3', head_temp=132
+        )
 
     def on_stop(self):
-        for pin in pins.values():
+        for pin in PINS.values():
             if pin is not None:
-                lgpio.gpio_write(chip, pin, 0)
-        lgpio.gpiochip_close(chip)
-
+                lgpio.gpio_write(CHIP, pin, 0)
+        lgpio.gpiochip_close(CHIP)
 
 if __name__ == '__main__':
+    Window.clearcolor = (0, 0, 0, 1)
     ATCDashApp().run()
