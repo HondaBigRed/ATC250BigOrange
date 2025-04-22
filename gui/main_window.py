@@ -143,14 +143,10 @@ class DashboardScreen(Screen):
 
         # Middle section for Speed, RPM, AFR, Gear
         mid_row = BoxLayout(orientation='horizontal', spacing=40, size_hint_y=0.45)
-        self.speed_label = Label(text="Speed
-0 MPH", font_size='28sp', halign='center')
-        self.rpm_label = Label(text="RPM
-0", font_size='28sp', halign='center')
-        self.afr_label = Label(text="AFR
-14.7", font_size='28sp', halign='center')
-        self.gear_label = Label(text="Gear
-N", font_size='28sp', halign='center')
+        self.speed_label = Label(text="Speed\n0 MPH", font_size='28sp', halign='center')
+        self.rpm_label = Label(text="RPM\n0", font_size='28sp', halign='center')
+        self.afr_label = Label(text="AFR\n14.7", font_size='28sp', halign='center')
+        self.gear_label = Label(text="Gear\nN", font_size='28sp', halign='center')
         for widget in [self.speed_label, self.rpm_label, self.afr_label, self.gear_label]:
             widget.bind(size=widget.setter('text_size'))
             mid_row.add_widget(widget)
@@ -158,10 +154,8 @@ N", font_size='28sp', halign='center')
 
         # Bottom section for Temps
         bottom_row = BoxLayout(orientation='horizontal', spacing=40, size_hint_y=0.35)
-        self.temp_label = Label(text="Head Temp
-0°C", font_size='26sp', halign='center')
-        self.egt_label = Label(text="EGT
-0°C", font_size='26sp', halign='center')
+        self.temp_label = Label(text="Head Temp\n0°C", font_size='26sp', halign='center')
+        self.egt_label = Label(text="EGT\n0°C", font_size='26sp', halign='center')
         for widget in [self.temp_label, self.egt_label]:
             widget.bind(size=widget.setter('text_size'))
             bottom_row.add_widget(widget)
@@ -172,18 +166,12 @@ N", font_size='28sp', halign='center')
     def update_dashboard(self, speed, rpm, afr, gear, head_temp):
         egt = head_temp + 300
         self.rpm_bar.value = rpm
-        self.speed_label.text = f"Speed
-{speed} MPH"
-        self.rpm_label.text = f"RPM
-{rpm}"
-        self.afr_label.text = f"AFR
-{afr:.2f}"
-        self.gear_label.text = f"Gear
-{gear}"
-        self.temp_label.text = f"Head Temp
-{head_temp}°C"
-        self.egt_label.text = f"EGT
-{egt}°C"
+        self.speed_label.text = f"Speed\n{speed} MPH"
+        self.rpm_label.text = f"RPM\n{rpm}"
+        self.afr_label.text = f"AFR\n{afr:.2f}"
+        self.gear_label.text = f"Gear\n{gear}"
+        self.temp_label.text = f"Head Temp\n{head_temp}°C"
+        self.egt_label.text = f"EGT\n{egt}°C"
 
 class ATCDashApp(App):
     def __init__(self, **kwargs):
@@ -198,7 +186,6 @@ class ATCDashApp(App):
         self.sm.add_widget(self.relay_screen)
         self.sm.add_widget(self.dashboard_screen)
 
-        # Bind swipe gestures
         Window.bind(on_touch_down=self.on_touch_down, on_touch_up=self.on_touch_up)
         self._touch_start_x = 0
 
