@@ -135,22 +135,46 @@ class DashboardScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         layout = BoxLayout(orientation='vertical', spacing=10, padding=20)
-        layout.add_widget(Label(text="Live Dashboard", font_size=24))
-        self.speed_label = Label(text="Speed: 0 MPH", font_size=20)
-        self.rpm_label = Label(text="RPM: 0", font_size=20)
-        self.afr_label = Label(text="AFR: 14.7", font_size=20)
-        self.gear_label = Label(text="Gear: N", font_size=20)
-        self.temp_label = Label(text="Head Temp: 0°C", font_size=20)
-        for widget in [self.speed_label, self.rpm_label, self.afr_label, self.gear_label, self.temp_label]:
-            layout.add_widget(widget)
+
+        # Top RPM bar (simulated visual bar)
+        self.rpm_bar = Label(text="RPM Bar: [--------]", font_size=20)
+        layout.add_widget(self.rpm_bar)
+
+        # Middle row: Speed, RPM, AFR, Gear
+        mid_row = BoxLayout(orientation='horizontal', spacing=20)
+        self.speed_label = Label(text="Speed: 0 MPH", font_size=24)
+        self.rpm_label = Label(text="RPM: 0", font_size=24)
+        self.afr_label = Label(text="AFR: 14.7", font_size=24)
+        self.gear_label = Label(text="Gear: N", font_size=24)
+        for widget in [self.speed_label, self.rpm_label, self.afr_label, self.gear_label]:
+            mid_row.add_widget(widget)
+        layout.add_widget(mid_row)
+
+        # Bottom row: Temps
+        bottom_row = BoxLayout(orientation='horizontal', spacing=20)
+        self.temp_label = Label(text="Head Temp: 0°C", font_size=24)
+        self.egt_label = Label(text="EGT: 0°C", font_size=24)
+        for widget in [self.temp_label, self.egt_label]:
+            bottom_row.add_widget(widget)
+        layout.add_widget(bottom_row)
+
         self.add_widget(layout)
 
     def update_dashboard(self, speed, rpm, afr, gear, head_temp):
+        # Simulate EGT from head temp (for now)
+        egt = head_temp + 300
+
+        # RPM bar visual approximation (text-based)
+        rpm_level = min(int((rpm / 7000) * 10), 10)
+        rpm_bar_text = '[' + ('#' * rpm_level).ljust(10, '-') + ']'
+        self.rpm_bar.text = f"RPM Bar: {rpm_bar_text}"
+
         self.speed_label.text = f"Speed: {speed} MPH"
         self.rpm_label.text = f"RPM: {rpm}"
         self.afr_label.text = f"AFR: {afr:.2f}"
         self.gear_label.text = f"Gear: {gear}"
         self.temp_label.text = f"Head Temp: {head_temp}°C"
+        self.egt_label.text = f"EGT: {egt}°C"
 
 class ATCDashApp(App):
     def __init__(self, **kwargs):
