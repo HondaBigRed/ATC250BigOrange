@@ -2,15 +2,13 @@ import os
 os.environ['KIVY_NO_ARGS'] = '1'
 
 from kivy.app import App
-from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
+from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.image import Image
 from kivy.uix.behaviors import ButtonBehavior
-from kivy.uix.button import Button
 from kivy.clock import Clock
 from kivy.core.window import Window
-from functools import partial
 from pathlib import Path
 import lgpio
 import time
@@ -24,7 +22,7 @@ HALL_GPIO = 17
 
 print(">>> DASH STARTING UP")
 
-# Setup all relay output pins
+# Setup relay output pins
 PINS = {
     "low": 4,
     "high": 26,
@@ -161,25 +159,37 @@ class ATCDashApp(App):
         self.last_time = time.time()
 
     def build(self):
-        self.sm = ScreenManager(transition=SwapTransition())
+        self.sm = ScreenManager(transition=SlideTransition())
         self.relay_screen = RelayControlScreen(name='relays')
         self.dashboard_screen = DashboardScreen(name='dashboard')
         self.sm.add_widget(self.relay_screen)
         self.sm.add_widget(self.dashboard_screen)
 
-        root = BoxLayout(orientation='vertical')
-        toggle_btn = Button(text="Switch Screen", size_hint_y=None, height=50)
-        toggle_btn.bind(on_press=self.toggle_screen)
-        root.add_widget(toggle_btn)
-        root.add_widget(self.sm)
+        # Bind swipe gestures
+        Window.bind(on_touch_down=self.on_touch_down, on_touch_up=self.on_touch_up)
+        self._touch_start_x = 0
 
         Clock.schedule_interval(self.update_speed, 1)
         Clock.schedule_interval(self.poll_hall_sensor, 0.05)
 
-        return root
+        return self.sm
 
-    def toggle_screen(self, *args):
-        self.sm.current = 'dashboard' if self.sm.current == 'relays' else 'relays'
+    def on_touch_down(self, window, touch):
+        self._touch_start_x = touch.x
+
+    def on_touch_up(self, window, touch):
+        dx = touch.x - self._touch_start_x
+        if abs(dx) > 50:
+            if dx > 0:
+                self.switch_screen("left")
+            else:
+                self.switch_screen("right")
+
+    def switch_screen(self, direction):
+        if direction == "left":
+            self.sm.current = "relays"
+        elif direction == "right":
+            self.sm.current = "dashboard"
 
     def poll_hall_sensor(self, dt):
         level = lgpio.gpio_read(CHIP, HALL_GPIO)
