@@ -135,43 +135,60 @@ class RelayControlScreen(Screen):
 class DashboardScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        from kivy.uix.gridlayout import GridLayout
+        from kivy.uix.widget import Widget
+        from kivy.uix.label import Label
+        from kivy.uix.boxlayout import BoxLayout
+        from kivy.graphics import Color, Rectangle
+
         layout = BoxLayout(orientation='vertical', spacing=10, padding=20)
 
         # RPM Bar styled like TS Dash
-        self.rpm_bar = ProgressBar(max=7000, value=0, size_hint_y=0.08)
+        self.rpm_bar = ProgressBar(max=7000, value=0, size_hint_y=0.06)
         layout.add_widget(self.rpm_bar)
 
-        # Middle section for Speed, RPM, AFR, Gear
-        mid_row = BoxLayout(orientation='horizontal', spacing=40, size_hint_y=0.45)
-        self.speed_label = Label(text="Speed\n0 MPH", font_size='28sp', halign='center')
-        self.rpm_label = Label(text="RPM\n0", font_size='28sp', halign='center')
-        self.afr_label = Label(text="AFR\n14.7", font_size='28sp', halign='center')
-        self.gear_label = Label(text="Gear\nN", font_size='28sp', halign='center')
-        for widget in [self.speed_label, self.rpm_label, self.afr_label, self.gear_label]:
-            widget.bind(size=widget.setter('text_size'))
-            mid_row.add_widget(widget)
-        layout.add_widget(mid_row)
+        # GridLayout for TS-style tiles
+        tile_grid = GridLayout(cols=3, spacing=20, size_hint_y=0.9)
 
-        # Bottom section for Temps
-        bottom_row = BoxLayout(orientation='horizontal', spacing=40, size_hint_y=0.35)
-        self.temp_label = Label(text="Head Temp\n0°C", font_size='26sp', halign='center')
-        self.egt_label = Label(text="EGT\n0°C", font_size='26sp', halign='center')
-        for widget in [self.temp_label, self.egt_label]:
-            widget.bind(size=widget.setter('text_size'))
-            bottom_row.add_widget(widget)
-        layout.add_widget(bottom_row)
+        def create_tile(label_text):
+            box = BoxLayout(orientation='vertical', padding=10, size_hint=(1, 1))
+            with box.canvas.before:
+                Color(0.1, 0.1, 0.1, 1)
+                box.bg_rect = Rectangle(size=box.size, pos=box.pos)
+                box.bind(size=lambda instance, value: setattr(box.bg_rect, 'size', value))
+                box.bind(pos=lambda instance, value: setattr(box.bg_rect, 'pos', value))
+            value_label = Label(text="0", font_size='36sp', bold=True, halign='center')
+            title_label = Label(text=label_text, font_size='18sp', halign='center')
+            value_label.bind(size=value_label.setter('text_size'))
+            title_label.bind(size=title_label.setter('text_size'))
+            box.add_widget(value_label)
+            box.add_widget(title_label)
+            return box, value_label
 
+        self.rpm_tile, self.rpm_value = create_tile("RPM")
+        self.speed_tile, self.speed_value = create_tile("Speed (MPH)")
+        self.gear_tile, self.gear_value = create_tile("Gear")
+        self.afr_tile, self.afr_value = create_tile("AFR")
+        self.egt_tile, self.egt_value = create_tile("EGT (°C)")
+        self.temp_tile, self.temp_value = create_tile("Head Temp (°C)")
+
+        for tile in [self.rpm_tile, self.speed_tile, self.gear_tile,
+                     self.afr_tile, self.egt_tile, self.temp_tile]:
+            tile_grid.add_widget(tile)
+
+        layout.add_widget(tile_grid)
         self.add_widget(layout)
 
     def update_dashboard(self, speed, rpm, afr, gear, head_temp):
         egt = head_temp + 300
         self.rpm_bar.value = rpm
-        self.speed_label.text = f"Speed\n{speed} MPH"
-        self.rpm_label.text = f"RPM\n{rpm}"
-        self.afr_label.text = f"AFR\n{afr:.2f}"
-        self.gear_label.text = f"Gear\n{gear}"
-        self.temp_label.text = f"Head Temp\n{head_temp}°C"
-        self.egt_label.text = f"EGT\n{egt}°C"
+
+        self.rpm_value.text = f"{rpm}"
+        self.speed_value.text = f"{speed}"
+        self.gear_value.text = f"{gear}"
+        self.afr_value.text = f"{afr:.2f}"
+        self.egt_value.text = f"{egt}"
+        self.temp_value.text = f"{head_temp}"
 
 class ATCDashApp(App):
     def __init__(self, **kwargs):
