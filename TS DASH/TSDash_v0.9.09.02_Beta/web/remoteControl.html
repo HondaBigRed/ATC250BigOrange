@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html><head><title>Remote Control</title>
+  <style type="text/css">
+      <!--
+        td.border { background-color: rgb(0,0,0); color:white; border-width: 0 }
+        td.dash { background-color: rgb(192,192,192); color:white; border-width: 1 }
+      -->
+    </style>
+<script type="text/javascript">
+   function changeImage(){
+        document.getElementById('dashImg').src='/screenInfo?action=getScreenShot&'+Math.random();
+   }
+   
+   function goRight(){
+       //document.getElementById('deadCall').src='/dashboardEdit?action=moveRight';
+       sendCommand('/dashboardEdit?action=moveRight');
+       setTimeout(changeImage, 2000);
+   }
+   
+   function goUp(){
+       //document.getElementById('deadCall').src='/dashboardEdit?action=moveUp';
+       sendCommand('/dashboardEdit?action=moveUp');
+       setTimeout(changeImage, 2000);
+   }
+   
+   function goLeft(){
+       //document.getElementById('deadCall').src='/dashboardEdit?action=moveLeft';
+       sendCommand('/dashboardEdit?action=moveLeft');
+       setTimeout(changeImage, 2000);
+   }
+   
+   function goDown(){
+       //document.getElementById('deadCall').src='/dashboardEdit?action=moveDown';
+       sendCommand('/dashboardEdit?action=moveDown');
+       setTimeout(changeImage, 2000);
+   }
+   
+   function shutDown(){
+       //document.getElementById('deadCall').src='/system?action=exitApp';
+       sendCommand('/system?action=shutdown');
+       document.getElementById('dashImg').src='/images/blankDash.png';
+   }
+   
+   function exitApp(){
+       //document.getElementById('deadCall').src='/system?action=exitApp';
+       sendCommand('/system?action=exitApp');
+       document.getElementById('dashImg').src='/images/blankDash.png';
+   }
+   
+   function sendCommand(uri){
+       var xmlhttp = new XMLHttpRequest();
+       xmlhttp.open("GET", uri, false);
+       xmlhttp.send("");
+   }
+   
+   var colIndex = 0;
+   var rowIndex = 0;
+
+   function checkScreenIndex(){
+       var screenChanged = false;
+       var xmlhttp = new XMLHttpRequest();
+       xmlhttp.open("POST", "/screenInfo?action=getCurrentRowIndex" , false);
+       xmlhttp.send("");
+       if(rowIndex !== xmlhttp.responseText){
+           screenChanged = true;
+           rowIndex = xmlhttp.responseText;
+       }
+       //document.getElementById('txtScreenRowIndex').value=rowIndex;
+       xmlhttp = new XMLHttpRequest();
+       xmlhttp.open("POST", "/screenInfo?action=getCurrentColumnIndex" , false);
+       xmlhttp.send("");
+       if(colIndex !== xmlhttp.responseText){
+           screenChanged = true;
+           colIndex = xmlhttp.responseText;
+       }
+       //document.getElementById('txtScreenColIndex').value=colIndex;
+       if(screenChanged){
+           changeImage();
+       }
+   }
+   
+</script> 
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head><body onload="setInterval(checkScreenIndex, 600)"><center>
+        <!--<h1>Remote Control</h1> -->
+        <table style="border-width: 0; border-color: black; background-color: black;" >
+            <tbody>
+                <tr>
+                    <td class="border">
+                        <img src="images/application-exit.png" height="30" title="Exit Dash, donot shutdown for power off" onclick="exitApp();"  />
+                    </td>
+                    <td class="border" valign="center" align="center">
+                        <img alt="Up" width="30" src="images/upArrow.png" onclick="goUp();" />
+                    </td>
+                    <td class="border">
+                        <img src="images/power-switch-red.png" height="30" title="Close Dash and shutdown for power off" onclick="shutDown();"  />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border" valign="center">
+                        <img alt="Left" height="30" src="images/leftArrow.png" onclick="goLeft();" />
+                    </td>
+                    <td class="dash" valign="center">
+                        <div><img width="800" src="/screenInfo?action=getScreenShot" id="dashImg"/></div>
+                    </td>
+                    <td class="border" valign="center">
+                        <img alt="Right" height="30" src="images/rightArrow.png" onclick="goRight();"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border">
+                    
+                    </td>
+                    <td class="border" valign="center" align="center">
+                        <img alt="Down" width="30" src="images/downArrow.png" onclick="goDown();"/>
+                    </td>
+                    <td class="border">
+                    
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </center>
+        <img src="" alt="" id="deadCall"/>
+        <!--
+        <input id="txtScreenRowIndex" value="1" >
+        <input id="txtScreenColIndex" value="0" > -->
+    </body></html>

@@ -82,7 +82,7 @@ class RelayControlScreen(Screen):
         self.low_button.on_press = self.low_beam_pressed
         self.high_button.on_press = self.high_beam_pressed
         self.hazard_button.on_press = self.toggle_hazards
-        self.horn_button.bind(on_press=self.press_horn, on_release=self.release_horn)
+        self.horn_button.bind(on_touch_down=self.press_horn, on_touch_up=self.release_horn)
 
         layout.add_widget(self.low_button)
         layout.add_widget(self.high_button)
@@ -97,14 +97,22 @@ class RelayControlScreen(Screen):
         self.hazard_timer = None
 
     def low_beam_pressed(self, *args):
-        self.low_button.set_state(True)
-        self.high_button.set_state(False)
-        self.tail_button.set_state(True)
+        if self.low_button.state_on:
+            self.low_button.set_state(False)
+            self.tail_button.set_state(False)
+        else:
+            self.low_button.set_state(True)
+            self.high_button.set_state(False)
+            self.tail_button.set_state(True)
 
     def high_beam_pressed(self, *args):
-        self.high_button.set_state(True)
-        self.low_button.set_state(False)
-        self.tail_button.set_state(True)
+        if self.high_button.state_on:
+            self.high_button.set_state(False)
+            self.tail_button.set_state(False)
+        else:
+            self.high_button.set_state(True)
+            self.low_button.set_state(False)
+            self.tail_button.set_state(True)
 
     def toggle_hazards(self, *args):
         self.hazard_state = not self.hazard_state
@@ -124,13 +132,17 @@ class RelayControlScreen(Screen):
 
     def press_horn(self, *args):
         self.horn_button.set_state(True)
-        lgpio.gpio_write(CHIP, PINS["horn_400"], 1)
-        lgpio.gpio_write(CHIP, PINS["horn_500"], 1)
+        if PINS["horn_400"] is not None:
+            lgpio.gpio_write(CHIP, PINS["horn_400"], 1)
+        if PINS["horn_500"] is not None:
+            lgpio.gpio_write(CHIP, PINS["horn_500"], 1)
 
     def release_horn(self, *args):
         self.horn_button.set_state(False)
-        lgpio.gpio_write(CHIP, PINS["horn_400"], 0)
-        lgpio.gpio_write(CHIP, PINS["horn_500"], 0)
+        if PINS["horn_400"] is not None:
+            lgpio.gpio_write(CHIP, PINS["horn_400"], 0)
+        if PINS["horn_500"] is not None:
+            lgpio.gpio_write(CHIP, PINS["horn_500"], 0)
 
 class DashboardScreen(Screen):
     def __init__(self, **kwargs):

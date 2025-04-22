@@ -1,0 +1,39 @@
+<H2>Preferences</H2>
+
+<strong>$UserMessage</strong><br><br>
+<form name="pref" method="post">
+    <table><tbody>
+            <tr>
+                <td align="right">Set Dash Clock from ECU Real Time Clock on connect when available:*
+                </td><td><input type="checkbox" id="useMS3RTC" name="useMS3RTC" value="useMS3RTC" $rtcChecked></td>
+            </tr>
+            <tr>
+                <td align="right">Show navigation buttons when Offline and there is mouse movement:</td><td><input type="checkbox" id="showNavButtons" name="showNavButtons" value="showNavButtons" $showNavChecked></td>
+            </tr>
+            <tr>
+                <td align="right">Display Offline message on dash when not connected:</td><td><input type="checkbox" id="displayOffline" name="displayOffline" value="displayOffline" $offlineMsgChecked></td>
+            </tr>
+            <tr>
+                <td align="right">Name of this vehicle or Dash. This will be broadcast to identify it.</td><td><input type="Text" id="vehicleName" name="vehicleName" value="$vehicleName" ></td>
+            </tr>
+            <tr>
+                <td align="center" colspan="2">&nbsp;</td>
+            </tr>
+            <!--
+            <tr>
+                <td align="right">Use Project Caching for faster project loading. (Experimental):</td><td><input type="checkbox" id="displayOffline" name="projectCaching" value="projectCaching" $projectCachingChecked></td>
+            </tr> -->
+            <tr>
+                <td align="center" colspan="2">&nbsp;</td>
+            </tr>
+            <tr>
+                <td align="center" colspan="2"><font size="-1">*Requires Linux user to have sudo NOPASSWD privileges</font></td>
+            </tr>
+            <tr> <td>&nbsp;</td>
+                <td align="right"><input type="submit" value="Save"></td>
+            </tr>
+        </tbody>
+    </table>
+    <input type="hidden" name="pageId" value="preferences">
+    <input type="hidden" name="action" value="save">
+</form>

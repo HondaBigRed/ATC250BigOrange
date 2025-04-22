@@ -1,0 +1,39 @@
+        <H2>Network Settings</H2>
+
+		$UserMessage
+		<form name="wifi" method="post">
+        <table><tbody>
+		<tr>
+		<td align="center" colspan="2"><h3>Configuration Server</h3>(This Server)</td>
+		</tr>
+		<tr>
+		<td align="right">Configuration Server Port:</td><td>$configPort</td>
+		</tr>
+		<tr>
+		<td align="right">Configuration Server Password:</td><td><input type="text" name="configPassword" value="$configPassword"></td>
+		</tr>
+		<tr>
+		<td colspan="2"></td>
+		</tr>
+                <!--
+		<tr>
+		<td align="center" colspan="2"><h3>Wi-Fi</h3></td>
+		</tr>
+		<tr>
+		<td colspan="2">$CurrentSSID</td>
+		</tr>
+		<tr>
+		<td>Available Wi-Fi Networks</td><td>$SSIDList</td>
+		</tr>
+		<tr>
+		$PassKey
+		</tr>
+                -->
+		<tr> <td>&nbsp;
+		<input type="hidden" name="pageId" value="networking">
+		<input type="hidden" name="action" value="save">
+                    </td>
+			<td align="right"><input type="submit" value="Save"></td>
+		</tbody>
+		</table>
+		<form>

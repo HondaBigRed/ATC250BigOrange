@@ -1,0 +1,62 @@
+        <strong>$UserMessage</strong>
+		<form name="editAction" method="post">
+        <table><tbody>
+		<tr>
+		<td align="center" colspan="2"><h3>Action Trigger</h3></td>
+		</tr>
+		<tr>
+		    <td align="left" colspan="2"><input type="checkbox" id="actionEnabled" name="actionEnabled" value="true" $enabledChecked> Enabled</td>
+                </tr>
+		<tr>
+                    <td align="left">Trigger Name: $ActionNameInput</td><td align="left">$targetActionSelector</td>
+		</tr>
+                <tr><td colspan="2" align="left">
+                        <table class="bordered" >
+                            <td colspan="4" align="left">Trigger Action When</td>
+                            <tr>
+                                <td><input type="radio" id="Simple" name="triggerMode" value="Simple" $triggerSimpleSelect><label for="Simple">Simple</label></td>
+                                <td>$TriggerChannelSelect</td>
+                                <td><select name="triggerCondition" id="triggerCondition" ><option value="&gt;" $triggerGtSelect>&gt;</option><option value="="  $triggerEqSelect>=</option><option value="&lt;"  $triggerLtSelect>&lt;</option></select></td>
+                                <td><input type="number" name="triggerSimpleValue" id="triggerSimpleVal" size="5" value="$triggerSimpleValue"></td>
+                            </tr>
+                            <tr>
+                                <td><input type="radio" id="Expression" name="triggerMode" value="Expression" $triggerExpressionSelect><label for="Expression">Expression</label></td>
+                                <td colspan="3"><input type="text" id="triggerExpression" name="triggerExpression" value="$triggerExpressionValue" size="50"></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr><td colspan="2" align="left">&nbsp;</td>
+                <tr><td colspan="2" align="left">
+                        <table class="bordered" >
+                            <td colspan="4" align="left">Reset When</td>
+                            <tr>
+                                <td colspan="3"><input type="radio" id="Basic" name="resetMode" value="Basic" $resetBasicSelect><label for="Basic">Basic Reset - Reset as soon as trigger is not true</label></td>
+                                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><!-- screwy, but makes the SimpleValu not too small in the shitty Java widget -->
+                            </tr>
+                            <tr>
+                                <td><input type="radio" id="Simple" name="resetMode" value="Simple" $resetSimpleSelect><label for="Simple">Simple</label></td>
+                                <td>$ResetChannelSelect</td>
+                                <td><select  name="resetCondition" id="resetCondition"><option value="&gt;" $resetGtSelect>&gt;</option><option value="="  $resetEqSelect>=</option><option value="&lt;"  $resetLtSelect>&lt;</option></select></td>
+                                <td><input type="number" name="resetSimpleValue" id="resetSimpleValue" size="5" value="$resetSimpleValue"></td>
+                            </tr>
+                            <tr>
+                                <td><input type="radio" id="Expression" name="resetMode" value="Expression" $resetExpressionSelect><label for="Expression">Expression</label></td>
+                                <td colspan="3"><input type="text" id="resetExpression" name="resetExpression" value="$resetExpressionValue" size="50"></td>
+                            </tr>
+                            <tr>
+                                <td><input type="radio" id="Timed" name="resetMode" value="Timed" $resetTimedSelect><label for="Expression">Timed Reset</label></td>
+                                <td colspan="3"><input type="number" id="resetTime" name="resetTime" value="$resetTimedValue" min="0" max="600"> ms.</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+		<tr> <td>&nbsp;</td>
+			<td align="right"><input type="submit" value="Save"></td>
+                </tr>
+		</tbody>
+		</table>
+		<input type="hidden" name="pageId" value="actionManagement">
+		<input type="hidden" name="action" value="save">
+		<form>
+                    <br><br>

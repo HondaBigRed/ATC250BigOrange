@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	<settingGroups xmlns="http://www.IdeasAndSolutions.biz/:settingGroups">
+	<bibliography author="Phil Tobin - p_tobin@yahoo.com" company="Ideas And Solutions, copyright 2007-2009, All Rights Reserved." writeDate="Mon Mar 19 03:07:36 EDT 2007"/>
+	<versionInfo fileFormat="1.0" />
+	<groups>
+		<settingGroup name="lambdaSensor" displayName="EGO O2 Sensor">
+			<configurationOption name="NARROW_BAND_EGO" displayName="Narrowband Sensor" default="true" />
+			<configurationOption name="WB_1_0_LINEAR" displayName="Wideband in NB Emulator Mode, 0-1v 1.5-0.5 Lambda" />
+			<configurationOption name="AEM_LINEAR" displayName="AEM UEGO / Linear AEM-30-42xx" />
+			<configurationOption name="AEM_NON_LINEAR" displayName="AEM UEGO(Legacy) Controller AEM-30-230x" />
+			<configurationOption name="DIYWB_NON_LINEAR" displayName="DIY-WB or Tech Edge non-linear output" />
+			<configurationOption name="DYNOJET_LINEAR" displayName="DynoJet Wideband Commander" />
+			<configurationOption name="TECHEDGE_LINEAR" displayName="Tech Edge sensor giving 0-5V 9-19:1 AFR" />
+			<configurationOption name="INNOVATE_1_2_LINEAR" displayName="Innovate sensor giving 1-2V 10-20:1 AFR" />
+			<configurationOption name="INNOVATE_0_5_LINEAR" displayName="Innovate LC1, MTX-L, PLX 0-5V 10-20:1 AFR" />
+			<configurationOption name="INNOVATE_LC1_DEFAULT" displayName="Innovate LC-1 default, 0-5v = 0.5-1.5 lambda" />
+			<configurationOption name="ZEITRONIX_NON_LINEAR" displayName="Zeitronix Non-linear WB" />
+			<configurationOption name="WB_UNKNOWN" displayName="Wideband sensor but none of the above types" />
+		</settingGroup>
+		<settingGroup name="lambdaDisplay" displayName="Lambda Display">
+			<configurationOption name="LAMBDA" displayName="Lambda" default="false" />
+			<configurationOption name="AFR" displayName="AFR" default="true" />
+		</settingGroup>
+		<settingGroup name="temperatureDisplay" displayName="Temperature Display">
+			<configurationOption name="FAHRENHEIT" displayName="Fahrenheit" default="true" />
+			<configurationOption name="CELSIUS" displayName="Celsius" default="false" />
+		</settingGroup>
+		<settingGroup name="mapBaro" displayName="MAP Baro">
+			<configurationOption name="" displayName="MAP Baro off (Default)" default="true" />
+			<configurationOption name="MAPbaro" displayName="MAP Baro ON - Must match Other Fuel Settings" default="false" />
+		</settingGroup>
+                <settingGroup name="additional fuel" displayName="Additional Fuel"> 
+                        <configurationOption name="" displayName="N2O off (Default)" default="true" />
+                        <configurationOption name="n2o" displayName="N2O" default="false" />
+                </settingGroup>
+		<settingGroup name="pressureDisplay" displayName="Manifold Pressure Display">
+			<configurationOption name="KPa" displayName="KPa" default="true" />
+			<configurationOption name="PSI" displayName="PSI" default="false" />
+		</settingGroup>
+		<settingGroup name="fuelingAlgorithm" displayName="Fueling Algorithms">
+			<configurationOption name="SPEED_DENSITY" displayName="Speed Density Fueling Algorithm" default="true" />
+			<configurationOption name="ALPHA_N" displayName="Alpha-N fueling Algorithm" default="false" />
+			<configurationOption name="AIR_FLOW_METER" displayName="Air Flow Meter" default="false" />
+		</settingGroup>
+		<settingGroup name="mapSensor" displayName="MAP Sensor">
+			<configurationOption name="MPX4115" displayName="MPX4115 - 115 kPa, MS v1.01" default="false" />
+			<configurationOption name="MPX4250" displayName="MPX4250 - 250 kPa, MS v2.2+" default="true" />
+			<configurationOption name="MPXH6300A" displayName="MPXH6300 - 300 kPa" default="false" infoLink="http://www.freescale.com/files/sensors/doc/data_sheet/MPXH6300A.pdf" />
+			<configurationOption name="MPXH6400A" displayName="MPXH6400 - 400 kPa" default="false" infoLink="http://www.freescale.com/files/sensors/doc/data_sheet/MPXH6400A.pdf" />
+		</settingGroup>
+	</groups>
+</settingGroups>

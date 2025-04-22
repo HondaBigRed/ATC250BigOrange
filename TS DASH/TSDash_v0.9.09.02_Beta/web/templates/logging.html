@@ -1,0 +1,68 @@
+        <H2>Data Logging</H2>
+
+        <strong>$UserMessage</strong>
+		<form name="triggeredLogging" method="post">
+        <table><tbody>
+		<tr>
+		<td align="center" colspan="2"><h3>Automatic Triggered Logging</h3></td>
+		</tr>
+		<tr>
+		<td align="left" colspan="2"><input type="checkbox" id="loggingEnabled" name="loggingEnabled" value="loggingEnabled" $enabledChecked> Enabled</td>
+		</tr>
+                <tr><td colspan="2" align="left">
+                        <table class="bordered" >
+                            <td colspan="4" align="left">Start Logging When</td>
+                            <tr>
+                                <td><input type="radio" id="Manual" name="startMode" value="Manual" $startManualSelect><label for="Manual">Manual</label></td>
+                                <td colspan="2">&nbsp;</td>
+                                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><!-- screwy, but makes the SimpleValu not too small in the shitty Java widget -->
+                            </tr>
+                            <tr>
+                                <td><input type="radio" id="Simple" name="startMode" value="Simple" $startSimpleSelect><label for="Simple">Simple</label></td>
+                                <td>$StartLoggingChannelSelect</td>
+                                <td><select name="startCondition" id="startCondition" ><option value="&gt;" $startGtSelect>&gt;</option><option value="="  $startEqSelect>=</option><option value="&lt;"  $startLtSelect>&lt;</option></select></td>
+                                <td><input type="number" name="startSimpleValue" id="startSimpleVal" size="5" value="$startSimpleValue"></td>
+                            </tr>
+                            <tr>
+                                <td><input type="radio" id="Expression" name="startMode" value="Expression" $startExpressionSelect><label for="Expression">Expression</label></td>
+                                <td colspan="3"><input type="text" id="startExpression" name="startExpression" value="$startExpressionValue" size="50"></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr><td colspan="2" align="left">&nbsp;</td>
+                <tr><td colspan="2" align="left">
+                        <table class="bordered" >
+                            <td colspan="4" align="left">Stop Logging When</td>
+                            <tr>
+                                <td><input type="radio" id="Manual" name="stopMode" value="Manual" $stopManualSelect><label for="Manual">Manual</label></td>
+                                <td colspan="2">&nbsp;</td>
+                                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><!-- screwy, but makes the SimpleValu not too small in the shitty Java widget -->
+                            </tr>
+                            <tr>
+                                <td><input type="radio" id="Simple" name="stopMode" value="Simple" $stopSimpleSelect><label for="Simple">Simple</label></td>
+                                <td>$StopLoggingChannelSelect</td>
+                                <td><select  name="stopCondition" id="stopCondition"><option value="&gt;" $stopGtSelect>&gt;</option><option value="="  $stopEqSelect>=</option><option value="&lt;"  $stopLtSelect>&lt;</option></select></td>
+                                <td><input type="number" name="stopSimpleValue" id="stopSimpleVal" size="5" value="$stopSimpleValue"></td>
+                            </tr>
+                            <tr>
+                                <td><input type="radio" id="Expression" name="stopMode" value="Expression" $stopExpressionSelect><label for="Expression">Expression</label></td>
+                                <td colspan="3"><input type="text" id="stopExpression" name="stopExpression" value="$stopExpressionValue" size="50"></td>
+                            </tr>
+                            <tr>
+                                <td><input type="radio" id="LogFor" name="stopMode" value="LogFor" $stopLogForSelect><label for="Expression">Log For</label></td>
+                                <td colspan="3"><input type="number" id="stopLogFor" name="stopLogFor" value="$stopLogForValue" min="0" max="600"> Seconds</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+		<tr> <td>&nbsp;</td>
+			<td align="right"><input type="submit" value="Save"></td>
+                </tr>
+		</tbody>
+		</table>
+		<input type="hidden" name="pageId" value="DataLogging">
+		<input type="hidden" name="action" value="save">
+		<form>
+                    $LogFileAccess
+                    <br><br>

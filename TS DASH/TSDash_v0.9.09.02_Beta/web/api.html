@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Function List</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <H1>Dash API's</H1>
+        <a href="/screenInfo?action=getScreenResolution">Gets Screen 0 resolution</a><br>
+        <a href="/screenInfo?action=getScreenCount">Gets Screen Count</a><br>
+        <a href="/screenInfo?action=getCurrentRowIndex">Get Current Row Index</a><br>
+        <a href="/screenInfo?action=getCurrentColumnIndex">Get Current Column Index</a><br>
+        <a href="/screenInfo?action=displayScreenShot">Display Screen shot</a><br>
+        <a href="/screenInfo?action=getScreenShot">Capture a Screen shot</a><br><br>
+        <form action="dashboardEdit" method="post" enctype="multipart/form-data">Update Dash file. Index:
+            <select id="index" name="index">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+                <option value="19">19</option>
+                <option value="20">20</option>
+            </select>
+            <input type="file" name="dashFile" id="dashFile">
+            <input type="hidden" name="action" id="action" value="replaceDash">
+            <input type="submit" value="Upload Dash" name="submit">
+        </form><br>
+        <form action="dashboardEdit" >
+            <input type="hidden" name="action" id="action" value="getDashFile">
+            Index:
+            <select id="index" name="index">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+                <option value="19">19</option>
+                <option value="20">20</option>
+            </select>
+            <input type="submit" value="Download Dash" name="submit">
+        </form><br>
+        <a href="/dashboardEdit?action=getDashCount">Gets Dash Count</a><br>
+        <a href="/dashboardEdit?action=moveLeft">Move dash Left</a><br>
+        <a href="/dashboardEdit?action=moveRight">Move dash Right</a><br>
+        <form action="dashboardEdit" >
+            <input type="hidden" name="action" id="action" value="moveToDashIndex">
+            Index: 
+            <select id="index" name="index">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+            </select>
+            <input type="submit" value="Move to Dash" name="submit">
+        </form><br><br>
+        
+        Project Actions: <br>
+        <form action="projectManager" method="post" enctype="multipart/form-data">Upload Project Archive
+            <input type="file" accept=".tsproj" name="projectFile" id="projectFile">
+            <input type="hidden" name="action" id="action" value="uploadAndOpenProject">
+            <input type="submit" value="Upload and Open Project" name="submit">
+        </form><br>
+        <form action="projectManager" >Open Project
+            <input type="hidden" name="action" id="action" value="loadProject">
+            <input type="text" name="projectName" id="projectName" value="">
+            <input type="submit" value="Open Project" name="submit">
+        </form><br>
+
+        <a href="/projectManager?action=getOpenProject">Download Open Project</a><br>
+        <a href="/projectManager?action=getOpenProjectMinimal">Download Minimal Open Project</a> - Only get core project and dash<br>
+        <br><br>
+        Log File Actions:<br>
+        <a href="/LogFileActions?action=listLogs">List Logs in open project.</a> optional parameter: projectName will list log files from different project<br>
+        <a href="/LogFileActions?action=deleteLog&logFileName=SomeFileName">Delete Log File</a> optional parameter: projectName <br>
+        <a href="/LogFileActions?action=downloadLog&logFileName=SomeFileName">Download a Log File.</a> optional parameter: projectName <br>
+        <br><br>
+        System Actions:<br>
+        <a href="/system?action=shutdown">Shutdown PC</a><br>
+        <a href="/system?action=exitApp">Exit Dashboard</a><br>
+        <a href="/system?action=startTerminal">Start a Terminal</a><br>
+        <a href="/system?action=exitToLxPanel">Exit to LXPanel</a> - only works on linux with lxpanel, otherwise just exits<br>
+        <a href="/system?action=startLxPanel">Start LXPanel</a> - only works on linux with lxpanel, otherwise does nothing <br>
+        
+    </body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Language" content="en">
+  <title>Tuner Dash Configuration</title>
+
+  
+  
+  <meta charset="UTF-8">
+  
+  <style type="text/css">
+      <!--
+        body { color: Black; font-family: Arial, Helvetica, sans-serif; margin-top: 10px; font-size: 10px; margin-left: 10px; margin-right: 10px }
+        td { font-family: Arial, Helvetica, sans-serif; color: Black; font-size: 10px;}
+        h3 { font-family: Arial, Helvetica, sans-serif; color: blue }
+        li { padding-top: 4px }
+        h1 { font-family: Arial, Helvetica, sans-serif; color: blue; font-size: 34px; }
+        h2 { font-family: Arial, Helvetica, sans-serif;  color: blue;}
+        strong { font-family: Arial, Helvetica, sans-serif; color: orangered; font-weight: bold; font-size: 14px; }
+        td.selected { background-color: rgb(192, 196, 255); color:white; visited: white; }
+        a.selected a:visited { color: white;}
+        a:link, a:visited { color:black; }
+        input[type=button], input[type=submit], input[type=reset] {
+          background-color: #0352fc;
+          border: none;
+          color: white;
+          padding: 10px 28px;
+          text-decoration: none;
+          margin: 4px 2px;
+          cursor: pointer;
+        }
+        table.bordered, th.bordered, td.bordered {
+            border: 1px solid black;
+            border-collapse: collapse;
+            border-color: #A2A2A2;
+            padding-top: 4px;
+            padding-bottom: 4px;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+        table.borderedOutside {
+            border: 1px solid black;
+            border-collapse: collapse;
+            border-color: #A2A2A2;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+        }
+
+        /* Tooltip text */
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 520px;
+            background-color: #555;
+            color: #fff;
+            text-align: left;
+            padding: 5px 5px;
+            border-radius: 6px;
+
+            /* Position the tooltip text */
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -240px;
+
+            /* Fade in tooltip */
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* Tooltip arrow */
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
+
+        /* Show the tooltip text when you mouse over the tooltip container */
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+-->
+    </style>
+<script>
+    var coll = document.getElementsByClassName("collapsible");
+    var i;
+
+    for (i = 0; i < coll.length; i++) {
+      coll[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.maxHeight){
+          content.style.maxHeight = null;
+        } else {
+          content.style.maxHeight = content.scrollHeight + "px";
+        }
+      });
+    }
+</script>
+</head><body style="background-color: rgb(32, 36, 64);">
+<center>
+<table style="background-color: white;" width="96%">
+  <tbody>
+    <tr>
+        <td style="vertical-align: top;"><a href="/"><img border="0" style="width: 165px; height: 83px;" alt="Logo" src="images/efi-logo.png"></a> </td>
+      <td style="vertical-align: top; text-align: center;">
+      <h1><big>$AppName</big></h1>$UpdateAvailable
+      </td>
+      <td width="153" style="vertical-align: top; text-align: right;"><img style="width: 152px; height: 83px;" alt="Dash" src="images/dash.png"><br>
+      </td>
+    </tr>
+    <tr style="vertical-align: top;" >
+      <td vertical-align="Top" style="vertical-align: top;" >$Menu</td>
+      <td align="center" rowspan="4">$WorkSpace</td>
+      <!--<td align="center" colspan="2" rowspan="4">$WorkSpace</td> -->
+    </tr>
+    <tr style="vertical-align: top;" >
+      <td vertical-align="Top" style="vertical-align: top;" >&nbsp;</td>
+    </tr>
+    <tr style="vertical-align: top;" >
+      <td vertical-align="Top" style="vertical-align: top;" >&nbsp;</td>
+    </tr>
+<tr>
+<td colspan="3" align="center">&nbsp; </td>
+</tr>
+   <tr>
+      <td colspan="3" align="center"><font size="-1">© EFI Analytics, Inc</font> </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+
+<br>
+
+<br>
+
+</body></html>

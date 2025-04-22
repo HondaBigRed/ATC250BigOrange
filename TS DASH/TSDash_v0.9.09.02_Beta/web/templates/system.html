@@ -1,0 +1,23 @@
+        <H2>System</H2>
+
+        <strong>$UserMessage</strong><br><br>
+        <br>
+        $SoftwareUpdates
+        <br>
+        <h3>Scripts</h3>
+        <a href="/index.html?pageId=system&action=editAfterStart">Edit After Startup Script</a><br>
+        <a href="/index.html?pageId=system&action=editBeforeShutdown">Edit Before Shutdown Script</a><br>
+        <br>
+        <h3>System Actions</h3>
+    <!--    <a href="/system?action=exitApp">Exit Dashboard</a><br> -->
+        <a href="/system?action=exitToLxPanel">Exit Dashboard</a> - No Reboot<br> 
+        <a href="/system?action=restartApp">Restart Dashboard</a> - No Reboot<br> 
+        $StartDesktopManager
+        $OpenTerminal
+        <a href="/system?action=downloadAppDebug">Download AppDebug File</a><br> 
+        <br>
+        <a href="/system?action=shutdown"><img width="32" height="32" src="images/power-switch-red.png"><br>Shutdown Dash OS</a><br>
+        <br><br>
+        <h3>System Status</h3>
+        $SystemStatus
+

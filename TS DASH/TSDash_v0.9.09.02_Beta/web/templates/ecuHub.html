@@ -1,0 +1,40 @@
+        <H2>Dash Echo Configuration</H2>
+
+        <strong>$UserMessage</strong><br>
+    <form name="dashEcho" method="post">
+        <table><tbody>
+                <tr>
+                    <td align="Right">Licensed Seats:</td><td>$LicensedSeats - (<a href="/index.html?pageId=dashEcho.license">Manage Licensing</a>)</td>
+                </tr>
+                <tr>
+                    <td colspan="2">&nbsp;</td>
+                </tr>
+                <tr>
+                    $ECUHubHTMLSettings
+                </tr>
+                <tr>
+                    <td colspan="2">&nbsp;</td>
+                </tr>
+		<tr> <td>&nbsp;</td>
+                    <td align="left"><input type="submit" value="Save"></td>
+		</tr>
+                <tr>
+                    <td colspan="2">&nbsp;</td>
+                </tr>
+                $ImageRow
+                <tr><td colspan="2">
+                    The AppName Dash Echo Server allows you to connect TunerStudio to your dashboard for tuning and data logging of your ECU.<br>
+                    No need to disconnect your dash from your ECU when you want to tune. You can also connect additional AppName for multiple screens. 
+                    In fact, you can connect multiple dashboards and multiple laptops running TunerStudio all at the same time! 
+                    Any tuning changes made by any laptop are propagated to all other connected devices. All is kept in sync by the Dash Echo Server.<br>
+                    <br>
+                    All that is needed is for all devices to be on the same WiFi network. That network can be served by the dashboard itself.<br>
+                    See more: $EcuHubLink
+                    
+                    </td>
+		</tr>
+		</tbody>
+		</table>
+		<input type="hidden" name="pageId" value="dashEcho">
+		<input type="hidden" name="action" value="save">
+    </form>
