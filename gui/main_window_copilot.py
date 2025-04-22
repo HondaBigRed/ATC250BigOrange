@@ -9,6 +9,8 @@ from kivy.uix.image import Image
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.clock import Clock
 from kivy.core.window import Window
+from kivy.uix.progressbar import ProgressBar
+from kivy.uix.boxlayout import BoxLayout
 from pathlib import Path
 import lgpio
 import time
@@ -58,7 +60,6 @@ class IconButton(ButtonBehavior, Image):
             lgpio.gpio_write(CHIP, self.gpio_pin, int(self.state_on))
 
     def set_state(self, state: bool):
-        """Set the button state programmatically."""
         self.state_on = state
         self.source = self.on_icon if state else self.off_icon
         if self.gpio_pin is not None:
@@ -69,7 +70,6 @@ class RelayControlScreen(Screen):
         super().__init__(**kwargs)
         layout = GridLayout(cols=3, spacing=20, padding=20)
 
-        # Add buttons with logic
         self.low_button = self.add_relay_button(layout, "Low Beam", "low_on.png", "low_off.png", PINS["low"])
         self.high_button = self.add_relay_button(layout, "High Beam", "high_on.png", "high_off.png", PINS["high"])
         self.tail_button = self.add_relay_button(layout, "Tail Light", "tail_on.png", "tail_off.png", PINS["tail"])
@@ -80,7 +80,6 @@ class RelayControlScreen(Screen):
         self.hazard_state = False
         self.hazard_timer = None
 
-        # Add custom logic for specific buttons
         self.low_button.on_press = self.low_beam_pressed
         self.high_button.on_press = self.high_beam_pressed
         self.hazard_button.on_press = self.toggle_hazards
@@ -89,7 +88,6 @@ class RelayControlScreen(Screen):
         self.add_widget(layout)
 
     def add_relay_button(self, layout, label_text, on_icon, off_icon, gpio_pin):
-        """Helper to create and add relay buttons with labels."""
         button = IconButton(on_icon, off_icon, gpio_pin)
         label = Label(
             text=label_text,
@@ -103,7 +101,6 @@ class RelayControlScreen(Screen):
         return button
 
     def low_beam_pressed(self, *args):
-        """Logic for low beam button."""
         if self.low_button.state_on:
             self.low_button.set_state(False)
             self.tail_button.set_state(False)
@@ -113,7 +110,6 @@ class RelayControlScreen(Screen):
             self.tail_button.set_state(True)
 
     def high_beam_pressed(self, *args):
-        """Logic for high beam button."""
         if self.high_button.state_on:
             self.high_button.set_state(False)
             self.tail_button.set_state(False)
@@ -123,7 +119,6 @@ class RelayControlScreen(Screen):
             self.tail_button.set_state(True)
 
     def toggle_hazards(self, *args):
-        """Logic for toggling hazard lights."""
         self.hazard_state = not self.hazard_state
         self.hazard_button.set_state(self.hazard_state)
         if self.hazard_state:
@@ -135,13 +130,11 @@ class RelayControlScreen(Screen):
             self.tail_button.set_state(False)
 
     def flash_hazards(self, dt):
-        """Blink hazard lights."""
         toggle = not self.high_button.state_on
         self.high_button.set_state(toggle)
         self.tail_button.set_state(not toggle)
 
     def press_horn(self, *args):
-        """Horn press-and-hold logic."""
         self.horn_button.set_state(True)
         if PINS["horn_400"] is not None:
             lgpio.gpio_write(CHIP, PINS["horn_400"], 1)
@@ -149,14 +142,56 @@ class RelayControlScreen(Screen):
             lgpio.gpio_write(CHIP, PINS["horn_500"], 1)
 
     def release_horn(self, *args):
-        """Release horn logic."""
         self.horn_button.set_state(False)
         if PINS["horn_400"] is not None:
             lgpio.gpio_write(CHIP, PINS["horn_400"], 0)
         if PINS["horn_500"] is not None:
             lgpio.gpio_write(CHIP, PINS["horn_500"], 0)
 
-# ... The rest of the DashboardScreen and ATCDashApp classes remain unchanged ...
+class DashboardScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        layout = BoxLayout(orientation='vertical', spacing=10, padding=20)
+
+        self.rpm_bar = ProgressBar(max=7000, value=0, size_hint_y=0.06)
+        layout.add_widget(self.rpm_bar)
+
+        tile_grid = GridLayout(cols=3, spacing=20, size_hint_y=0.9)
+
+        def create_tile(label_text):
+            box = BoxLayout(orientation='vertical', padding=10, size_hint=(1, 1))
+            value_label = Label(text="0", font_size='36sp', bold=True, halign='center')
+            title_label = Label(text=label_text, font_size='18sp', halign='center')
+            value_label.bind(size=value_label.setter('text_size'))
+            title_label.bind(size=title_label.setter('text_size'))
+            box.add_widget(value_label)
+            box.add_widget(title_label)
+            return box, value_label
+
+        self.rpm_tile, self.rpm_value = create_tile("RPM")
+        self.speed_tile, self.speed_value = create_tile("Speed (MPH)")
+        self.gear_tile, self.gear_value = create_tile("Gear")
+        self.afr_tile, self.afr_value = create_tile("AFR")
+        self.egt_tile, self.egt_value = create_tile("EGT (°C)")
+        self.temp_tile, self.temp_value = create_tile("Head Temp (°C)")
+
+        for tile in [self.rpm_tile, self.speed_tile, self.gear_tile,
+                     self.afr_tile, self.egt_tile, self.temp_tile]:
+            tile_grid.add_widget(tile)
+
+        layout.add_widget(tile_grid)
+        self.add_widget(layout)
+
+    def update_dashboard(self, speed, rpm, afr, gear, head_temp):
+        egt = head_temp + 300
+        self.rpm_bar.value = rpm
+
+        self.rpm_value.text = f"{rpm}"
+        self.speed_value.text = f"{speed}"
+        self.gear_value.text = f"{gear}"
+        self.afr_value.text = f"{afr:.2f}"
+        self.egt_value.text = f"{egt}"
+        self.temp_value.text = f"{head_temp}"
 
 class ATCDashApp(App):
     def __init__(self, **kwargs):
@@ -179,7 +214,47 @@ class ATCDashApp(App):
 
         return self.sm
 
-    # Additional logic for screen switching and GPIO updates is unchanged...
+    def on_touch_down(self, window, touch):
+        self._touch_start_x = touch.x
+
+    def on_touch_up(self, window, touch):
+        dx = touch.x - self._touch_start_x
+        if abs(dx) > 50:
+            if dx > 0:
+                self.switch_screen("left")
+            else:
+                self.switch_screen("right")
+
+    def switch_screen(self, direction):
+        if direction == "left":
+            self.sm.current = "relays"
+        elif direction == "right":
+            self.sm.current = "dashboard"
+
+    def poll_hall_sensor(self, dt):
+        level = lgpio.gpio_read(CHIP, HALL_GPIO)
+        if level == 0:
+            self.pulse_count += 1
+
+    def update_speed(self, dt):
+        now = time.time()
+        elapsed = now - self.last_time
+        self.last_time = now
+        rotations = self.pulse_count / PULSES_PER_REV
+        distance_m = rotations * WHEEL_CIRCUMFERENCE_M
+        speed_mps = distance_m / elapsed if elapsed else 0
+        speed_mph = speed_mps * 2.23694
+        self.pulse_count = 0
+
+        self.dashboard_screen.update_dashboard(
+            speed=int(speed_mph), rpm=3100, afr=14.2, gear='3', head_temp=132
+        )
+
+    def on_stop(self):
+        for pin in PINS.values():
+            if pin is not None:
+                lgpio.gpio_write(CHIP, pin, 0)
+        lgpio.gpiochip_close(CHIP)
 
 if __name__ == '__main__':
     Window.clearcolor = (0, 0, 0, 1)
