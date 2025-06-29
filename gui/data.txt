@@ -1,0 +1,55 @@
+import time
+import board
+import busio
+import adafruit_ads1x15.ads1115 as ADS
+from adafruit_ads1x15.analog_in import AnalogIn
+
+# Constants
+V_SUPPLY = 5.0       # Divider supply voltage
+R_FIXED = 2000.0     # 2kΩ fixed resistor for oil temp sensors
+
+# I2C and ADC setup
+i2c = busio.I2C(board.SCL, board.SDA)
+ads = ADS.ADS1115(i2c)
+
+# ADS1115 channels
+oil1 = AnalogIn(ads, ADS.P2)   # Oil Temp Sensor 1
+oil2 = AnalogIn(ads, ADS.P3)   # Oil Temp Sensor 2
+o2_afr = AnalogIn(ads, ADS.P0) # O2 Analog Out 1 (AFR)
+o2_alt = AnalogIn(ads, ADS.P1) # O2 Analog Out 2 (Optional)
+
+# Convert sensor resistance to approximate °F
+def resistance_to_temp_f(r):
+    if r >= 450: return 100
+    elif r >= 158: return 150
+    elif r >= 64: return 200
+    elif r >= 29: return 250
+    elif r >= 14: return 300
+    else: return 325
+
+# Convert 0.5–4.5V to AFR (LC-2 default scale: 0.5V=7.35, 4.5V=22.39)
+def voltage_to_afr(v):
+    if v < 0.5: return 0.0
+    elif v > 4.5: return 25.0
+    return (v - 0.5) * (22.39 - 7.35) / (4.5 - 0.5) + 7.35
+
+# Main loop
+while True:
+    v_oil1 = oil1.voltage
+    v_oil2 = oil2.voltage
+    v_o2_afr = o2_afr.voltage
+    v_o2_alt = o2_alt.voltage
+
+    r_oil1 = (V_SUPPLY / v_oil1 - 1) * R_FIXED if v_oil1 > 0 else float('inf')
+    r_oil2 = (V_SUPPLY / v_oil2 - 1) * R_FIXED if v_oil2 > 0 else float('inf')
+
+    t_oil1 = resistance_to_temp_f(r_oil1)
+    t_oil2 = resistance_to_temp_f(r_oil2)
+    afr = voltage_to_afr(v_o2_afr)
+
+    print(f"\n--- SENSOR DATA ---")
+    print(f"Oil Temp 1: {v_oil1:.2f} V | {r_oil1:.0f} Ω | {t_oil1}°F")
+    print(f"Oil Temp 2: {v_oil2:.2f} V | {r_oil2:.0f} Ω | {t_oil2}°F")
+    print(f"O2 AFR Out : {v_o2_afr:.2f} V → AFR: {afr:.2f}")
+    print(f"O2 Alt Out : {v_o2_alt:.2f} V (optional)")
+    time.sleep(1)
